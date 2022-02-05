@@ -1,0 +1,14 @@
+{
+  "files": {
+    "main.css": "/oolmos98/oolmos98.github.io-portfolio/static/css/main.43a66b22.css",
+    "main.js": "/oolmos98/oolmos98.github.io-portfolio/static/js/main.7404c9a5.js",
+    "static/media/portfolioSelfie.png": "/oolmos98/oolmos98.github.io-portfolio/static/media/portfolioSelfie.792eb9f8acfa6e774ffc.png",
+    "index.html": "/oolmos98/oolmos98.github.io-portfolio/index.html",
+    "main.43a66b22.css.map": "/oolmos98/oolmos98.github.io-portfolio/static/css/main.43a66b22.css.map",
+    "main.7404c9a5.js.map": "/oolmos98/oolmos98.github.io-portfolio/static/js/main.7404c9a5.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.43a66b22.css",
+    "static/js/main.7404c9a5.js"
+  ]
+}

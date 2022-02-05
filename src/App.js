@@ -1,11 +1,12 @@
-import React from "react"
-import Portfolio from "./Portfolio"
-function App() {
+import Portfolio from "./Portfolio";
+import whoami from "./me";
+
+const App = () => {
   return (
     <>
-      <Portfolio />
+      <Portfolio me={whoami} />
     </>
-  )
-}
+  );
+};
 
-export default App
+export default App;

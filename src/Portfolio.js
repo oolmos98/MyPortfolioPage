@@ -12,7 +12,7 @@ export default function Portfolio() {
           My name is {me.firstName + " " + me.lastName} <br />I am a graduate
           from the {me.school} with a {me.degree} in {me.study}.
           <br />
-          Below you will find relative links about myself.
+          Belowww you will find relative links about myself.
         </h1>
       </div>
     </>

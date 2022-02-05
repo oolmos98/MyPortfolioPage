@@ -4,7 +4,7 @@ const me = {
   title: "Software Developer",
   school: "University of California Merced",
   study: "Computer Science and Engineering",
-  degree: "Bachelors of Science",
+  degree: "Bachelor of Science",
   certificates: ["Google's IT Support"],
-}
-export default me
+};
+export default me;

@@ -1,11 +1,13 @@
-import React from "react"
-import me from "./me"
-import "./Portfolio.css"
-import logo from "./assets/img/portfolioSelfie.png"
+import React from "react";
+import me from "./me";
+import "./Portfolio.css";
+import logo from "./assets/img/portfolioSelfie.png";
 
 export default function Portfolio() {
   return (
     <>
+      <h1 id="comment">*work in progress*</h1>
+
       <div id="intro">
         <img id="logo" src={logo} alt="This is my selfie" />
         <h1>
@@ -16,6 +18,6 @@ export default function Portfolio() {
         </h1>
       </div>
     </>
-  )
+  );
 }
-console.log(me)
+console.log(me);

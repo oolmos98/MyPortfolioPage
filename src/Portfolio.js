@@ -38,14 +38,16 @@ const Portfolio = (props) => {
       <div className="intro floating">
         <img className="logo" src={logo} alt="This is my selfie" />
         <h1>
-          My name is {props.me.firstName + " " + props.me.lastName} <br />I am a
-          graduate from the {props.me.school} with a {props.me.degree} in{" "}
+          {props.me.firstName + " " + props.me.lastName} <br />
+          {props.me.school} <br /> <br />
+          {props.me.degree} <br />
           {props.me.study}.
           <br />
-          My current certifications include: {certsLoop(props.me.certificates)}
+          <br />
+          Certifications: {certsLoop(props.me.certificates)}
           <br />
           <br />
-          Below you will find relative links about myself.
+          Below you will find relative links.
         </h1>
         <br />
         <br />

@@ -3,7 +3,7 @@ const whoami = {
   lastName: "Olmos",
   title: "Software Developer",
   school: "University of California Merced",
-  study: "Computer Science and Engineering",
+  study: "Computer Science & Engineering",
   degree: "Bachelor of Science",
   certificates: [
     {

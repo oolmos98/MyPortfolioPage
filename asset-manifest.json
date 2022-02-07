@@ -1,14 +1,14 @@
 {
   "files": {
-    "main.css": "/www.omarolmos.com/static/css/main.aea67b67.css",
-    "main.js": "/www.omarolmos.com/static/js/main.18ed2e89.js",
-    "static/media/portfolioSelfie.png": "/www.omarolmos.com/static/media/portfolioSelfie.792eb9f8acfa6e774ffc.png",
-    "index.html": "/www.omarolmos.com/index.html",
-    "main.aea67b67.css.map": "/www.omarolmos.com/static/css/main.aea67b67.css.map",
-    "main.18ed2e89.js.map": "/www.omarolmos.com/static/js/main.18ed2e89.js.map"
+    "main.css": "/omarolmos.com/static/css/main.aea67b67.css",
+    "main.js": "/omarolmos.com/static/js/main.1b747a88.js",
+    "static/media/portfolioSelfie.png": "/omarolmos.com/static/media/portfolioSelfie.792eb9f8acfa6e774ffc.png",
+    "index.html": "/omarolmos.com/index.html",
+    "main.aea67b67.css.map": "/omarolmos.com/static/css/main.aea67b67.css.map",
+    "main.1b747a88.js.map": "/omarolmos.com/static/js/main.1b747a88.js.map"
   },
   "entrypoints": [
     "static/css/main.aea67b67.css",
-    "static/js/main.18ed2e89.js"
+    "static/js/main.1b747a88.js"
   ]
 }

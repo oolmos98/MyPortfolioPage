@@ -19,7 +19,8 @@ const whoami = {
     },
     {
       name: "Linkedin",
-      image: "http://assets.stickpng.com/images/58e91afdeb97430e81906504.png",
+      image:
+        "https://www.transparentpng.com/thumb/linkedin/linkedin-icon-png-4.png",
       link: "https://www.linkedin.com/in/oolmos/",
     },
     {

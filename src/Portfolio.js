@@ -19,7 +19,7 @@ const certsLoop = (certs) => {
         {name}
       </a>
     );
-    i === certs.length - 1 ? links.push(".") : links.push(", ");
+    i !== certs.length - 1 ? links.push(",") : links.push("");
   }
   return links;
 };
@@ -41,7 +41,7 @@ const Portfolio = (props) => {
           {props.me.firstName + " " + props.me.lastName} <br />
           {props.me.school} <br /> <br />
           {props.me.degree} <br />
-          {props.me.study}.
+          {props.me.study}
           <br />
           <br />
           Certifications: {certsLoop(props.me.certificates)}

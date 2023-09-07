@@ -5,6 +5,11 @@ const whoami = {
   school: "University of California Merced",
   study: "Computer Science & Engineering",
   degree: "Bachelor of Science",
+  summary1:
+    "In this evolving landscape of Full Stack development, my journey continues to be guided by an insatiable curiosity, a thirst for knowledge, and an unyielding passion to build meaningful digital experiences.",
+  summary2:
+    "My skills in React, JavaScript, Java, and Flutter serve as the cornerstones of my journey, enabling me to architect the future, one line of code at a time.",
+
   certificates: [
     {
       name: "Google's IT Support",
@@ -13,22 +18,16 @@ const whoami = {
   ],
   links: [
     {
-      name: "Github",
-      image: "https://cdn-icons-png.flaticon.com/512/25/25231.png",
-      link: "https://github.com/oolmos98",
-    },
-    {
       name: "Linkedin",
       image:
         "https://www.transparentpng.com/thumb/linkedin/linkedin-icon-png-4.png",
       link: "https://www.linkedin.com/in/oolmos/",
     },
     {
-      name: "Instagram",
-      image:
-        "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Instagram_logo_2016.svg/800px-Instagram_logo_2016.svg.png",
-      link: "https://www.instagram.com/ohhmmar/",
+      name: "Github",
+      image: "https://cdn-icons-png.flaticon.com/512/25/25231.png",
+      link: "https://github.com/oolmos98",
     },
   ],
-};
-export default whoami;
+}
+export default whoami

@@ -1,13 +1,12 @@
-import "./Portfolio.css";
-//import { Link } from "react-router-dom";
-import logo from "./assets/img/portfolioSelfie.png";
-import { CustomLink } from "./CustomLink";
+import "./Portfolio.css"
+import logo from "./assets/img/portfolioSelfie.jpg"
+import { CustomLink } from "./CustomLink"
 
 const certsLoop = (certs) => {
-  let links = [];
+  let links = []
   for (let i = 0; i < certs.length; i++) {
-    const name = certs[i].name;
-    const link = certs[i].link;
+    const name = certs[i].name
+    const link = certs[i].link
     links.push(
       <a
         className="link"
@@ -18,19 +17,19 @@ const certsLoop = (certs) => {
       >
         {name}
       </a>
-    );
-    i !== certs.length - 1 ? links.push(",") : links.push("");
+    )
+    i !== certs.length - 1 ? links.push(",") : links.push("")
   }
-  return links;
-};
+  return links
+}
 const linksLoop = (links) => {
-  let x = [];
+  let x = []
   for (let i = 0; i < links.length; i++) {
-    const l = links[i];
-    x.push(<CustomLink link={l} key={l.name} />);
+    const l = links[i]
+    x.push(<CustomLink link={l} key={l.name} />)
   }
-  return x;
-};
+  return x
+}
 
 const Portfolio = (props) => {
   return (
@@ -38,22 +37,25 @@ const Portfolio = (props) => {
       <div className="intro floating">
         <img className="logo" src={logo} alt="This is my selfie" />
         <h1>
-          {props.me.firstName + " " + props.me.lastName} <br />
-          {props.me.school} <br /> <br />
+          {props.me.firstName + " " + props.me.lastName} <br /> <br />
+          {props.me.school} <br />
           {props.me.degree} <br />
           {props.me.study}
           <br />
           <br />
+          {props.me.summary1}
+          <br />
+          <br />
+          {props.me.summary2}
+          <br />
+          <br />
           Certifications: {certsLoop(props.me.certificates)}
-          <br />
-          <br />
-          Below you will find relative links.
         </h1>
         <br />
         <br />
         {linksLoop(props.me.links)}
       </div>
     </>
-  );
-};
-export default Portfolio;
+  )
+}
+export default Portfolio

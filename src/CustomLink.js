@@ -1,4 +1,5 @@
-import React from "react";
+import React from "react"
+import { motion } from "framer-motion"
 
 export const CustomLink = (props) => {
   return (
@@ -10,17 +11,24 @@ export const CustomLink = (props) => {
           target="_blank"
           rel="noreferrer noopener"
         >
-          <div id="customLink">
+          <motion.div
+            id="customLink"
+            whileHover={{ scale: 1.2 }}
+            whileTap={{ scale: 0.8 }}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+          >
             <img
               id="socialImage"
               src={props.link.image}
               alt={props.link.name}
             />
             {props.link.name}
-          </div>
+          </motion.div>
         </a>
         <br />
       </div>
     </>
-  );
-};
+  )
+}

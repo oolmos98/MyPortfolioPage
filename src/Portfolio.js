@@ -1,14 +1,14 @@
-import "./Portfolio.css";
-import logo from "./assets/img/portfolioSelfie2.jpg";
-import { CustomLink } from "./CustomLink";
-import { Particles } from "react-tsparticles";
-import { useState } from "react";
+import "./Portfolio.css"
+import logo from "./assets/img/portfolioSelfie2.jpg"
+import { CustomLink } from "./CustomLink"
+import { Particles } from "react-tsparticles"
+import { useState } from "react"
 
 const certsLoop = (certs) => {
-  let links = [];
+  let links = []
   for (let i = 0; i < certs.length; i++) {
-    const name = certs[i].name;
-    const link = certs[i].link;
+    const name = certs[i].name
+    const link = certs[i].link
     links.push(
       <a
         className="link"
@@ -19,29 +19,29 @@ const certsLoop = (certs) => {
       >
         {name}
       </a>
-    );
-    i !== certs.length - 1 ? links.push(",") : links.push("");
+    )
+    i !== certs.length - 1 ? links.push(",") : links.push("")
   }
-  return links;
-};
+  return links
+}
 const linksLoop = (links) => {
-  let x = [];
+  let x = []
   for (let i = 0; i < links.length; i++) {
-    const l = links[i];
-    x.push(<CustomLink link={l} key={l.name} />);
+    const l = links[i]
+    x.push(<CustomLink link={l} key={l.name} />)
   }
-  return x;
-};
+  return x
+}
 
 const Portfolio = (props) => {
-  const [width, setWidth] = useState(window.innerWidth);
-  const isMobile = width <= 768;
+  const [width, setWidth] = useState(window.innerWidth)
+  const isMobile = width <= 768
   return (
     <>
       <Particles
         params={{
           fpsLimit: 120,
-          pauseOnBlur: true,
+          pauseOnBlur: false,
           particles: {
             color: {
               value: "#fff",
@@ -52,7 +52,7 @@ const Portfolio = (props) => {
             number: {
               density: {
                 enable: true,
-                area: 800,
+                area: 850,
               },
               value: isMobile ? 40 : 50,
             },
@@ -85,7 +85,7 @@ const Portfolio = (props) => {
                 quantity: 1,
               },
               repulse: {
-                distance: 50,
+                distance: 100,
                 duration: 0.4,
               },
             },
@@ -114,6 +114,6 @@ const Portfolio = (props) => {
         {linksLoop(props.me.links)}
       </div>
     </>
-  );
-};
-export default Portfolio;
+  )
+}
+export default Portfolio

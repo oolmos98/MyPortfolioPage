@@ -10,6 +10,30 @@ const whoami = {
   summary2:
     "My skills in React, JavaScript, Java, and Flutter serve as the cornerstones of my journey, enabling me to architect the future, one line of code at a time.",
 
+  sections: [
+    "Welcome to my Portfolio!",
+    "My name is Omar Olmos.",
+    "I have a Bachelor of Science degree in Computer Science & Engineering from the University of California Merced.",
+    "In this evolving landscape of Full Stack development, my journey continues to be guided by an insatiable curiosity, a thirst for knowledge, and an unyielding passion to build meaningful digital experiences.",
+  ],
+  skills: [
+    {
+      logo: "",
+      skill: "React.js",
+    },
+    {
+      logo: "",
+      skill: "JavaScript",
+    },
+    {
+      logo: "",
+      skill: "Java",
+    },
+    {
+      logo: "",
+      skill: "React.js",
+    },
+  ],
   certificates: [
     {
       name: "Google's IT Support",

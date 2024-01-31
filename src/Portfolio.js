@@ -1,16 +1,16 @@
-import "./Portfolio.css"
-import logo from "./assets/img/portfolioSelfie2.jpg"
-import { CustomLink } from "./CustomLink"
-import { Particles } from "react-tsparticles"
-import { useState } from "react"
-import { Section } from "./components/Section"
-import { SkillItem } from "./components/SkillItem"
+import "./Portfolio.css";
+import logo from "./assets/img/portfolioSelfie2.jpg";
+import { CustomLink } from "./components/CustomLink";
+import { Particles } from "react-tsparticles";
+import { useState } from "react";
+import { Section } from "./components/Section";
+import { SkillItem } from "./components/SkillItem";
 
 const certsLoop = (certs) => {
-  let links = []
+  let links = [];
   for (let i = 0; i < certs.length; i++) {
-    const name = certs[i].name
-    const link = certs[i].link
+    const name = certs[i].name;
+    const link = certs[i].link;
     links.push(
       <a
         className="link"
@@ -21,23 +21,23 @@ const certsLoop = (certs) => {
       >
         {name}
       </a>
-    )
-    i !== certs.length - 1 ? links.push(",") : links.push("")
+    );
+    i !== certs.length - 1 ? links.push(",") : links.push("");
   }
-  return links
-}
+  return links;
+};
 const linksLoop = (links) => {
-  let x = []
+  let x = [];
   for (let i = 0; i < links.length; i++) {
-    const l = links[i]
-    x.push(<CustomLink link={l} key={l.name} />)
+    const l = links[i];
+    x.push(<CustomLink link={l} key={l.name} />);
   }
-  return x
-}
+  return x;
+};
 
 const Portfolio = (props) => {
-  const [width, setWidth] = useState(window.innerWidth)
-  const isMobile = width <= 768
+  const [width, setWidth] = useState(window.innerWidth);
+  const isMobile = width <= 768;
   return (
     <>
       <Particles
@@ -103,26 +103,19 @@ const Portfolio = (props) => {
             flexDirection: "column",
             justifyContent: "center",
             alignItems: "center",
-            gap: "25px",
+            gap: "5px",
             flexWrap: "wrap",
             flexShrink: 3,
           }}
         >
           {props.me.sections.map((element) => {
-            return <Section section={element} />
+            return <Section section={element} />;
           })}
         </div>
 
         <div
           style={{
             width: "100%",
-            // height: "30px",
-            // display: "flex",
-            // alignItems: "center",
-            // flexDirection: "column",
-            // justifyContent: "center",
-            // maxHeight: "20px",
-            // flex: 1,
           }}
         >
           <h1>Here are technologies I have worked with:</h1>
@@ -131,12 +124,10 @@ const Portfolio = (props) => {
               textDecoration: "underline",
             }}
           >
-            Front End
+            Front End:
           </h2>
           <div
             style={{
-              // width: "100%",
-              // height: "40px",
               display: "flex",
               justifyContent: "center",
               gap: 50,
@@ -178,12 +169,10 @@ const Portfolio = (props) => {
             textDecoration: "underline",
           }}
         >
-          Back End
+          Back End:
         </h2>
         <div
           style={{
-            // width: "100%",
-            // height: "40px",
             display: "flex",
             justifyContent: "center",
             gap: 50,
@@ -221,6 +210,64 @@ const Portfolio = (props) => {
             skill={"AWS S3"}
           />
         </div>
+
+        <h2
+          style={{
+            marginTop: "45px",
+            textDecoration: "underline",
+          }}
+        >
+          Tools:
+        </h2>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            gap: 50,
+            alignItems: "center",
+            flexWrap: "wrap",
+            rowGap: 5,
+          }}
+        >
+          <SkillItem
+            logo={
+              "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Visual_Studio_Code_1.35_icon.svg/512px-Visual_Studio_Code_1.35_icon.svg.png"
+            }
+            skill={"Visual Studio Code"}
+          />
+          <SkillItem
+            logo={
+              "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/IntelliJ_IDEA_Icon.svg/1024px-IntelliJ_IDEA_Icon.svg.png"
+            }
+            skill={"IntelliJ IDEA"}
+          />
+          <SkillItem
+            logo={
+              "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Android_Studio_icon_%282023%29.svg/2048px-Android_Studio_icon_%282023%29.svg.png"
+            }
+            skill={"Android Studio"}
+          />
+          <SkillItem
+            logo={
+              "https://static-00.iconduck.com/assets.00/apps-insomnia-icon-512x512-dse2p0fm.png"
+            }
+            skill={"Insomnia"}
+          />
+          <SkillItem
+            logo={"https://www.svgrepo.com/show/448271/azure-devops.svg"}
+            skill={"Azure DevOps"}
+          />
+          <SkillItem
+            logo={
+              "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Git_icon.svg/2048px-Git_icon.svg.png"
+            }
+            skill={"Git"}
+          />
+          <SkillItem
+            logo={"https://cdn-icons-png.flaticon.com/512/25/25231.png"}
+            skill={"GitHub"}
+          />
+        </div>
         <br />
         <br />
 
@@ -228,6 +275,6 @@ const Portfolio = (props) => {
         {linksLoop(props.me.links)}
       </div>
     </>
-  )
-}
-export default Portfolio
+  );
+};
+export default Portfolio;

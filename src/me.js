@@ -16,24 +16,6 @@ const whoami = {
     "I have a Bachelor of Science degree in Computer Science & Engineering from the University of California Merced.",
     "In this evolving landscape of Full Stack development, my journey continues to be guided by an insatiable curiosity, a thirst for knowledge, and an unyielding passion to build meaningful digital experiences.",
   ],
-  skills: [
-    {
-      logo: "",
-      skill: "React.js",
-    },
-    {
-      logo: "",
-      skill: "JavaScript",
-    },
-    {
-      logo: "",
-      skill: "Java",
-    },
-    {
-      logo: "",
-      skill: "React.js",
-    },
-  ],
   certificates: [
     {
       name: "Google's IT Support",
@@ -53,5 +35,5 @@ const whoami = {
       link: "https://github.com/oolmos98",
     },
   ],
-}
-export default whoami
+};
+export default whoami;

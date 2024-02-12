@@ -1,49 +1,29 @@
-import "./Portfolio.css";
-import logo from "./assets/img/portfolioSelfie2.jpg";
-import { CustomLink } from "./components/CustomLink";
-import { Particles } from "react-tsparticles";
-import { useState } from "react";
-import { Section } from "./components/Section";
-import { SkillItem } from "./components/SkillItem";
+import "./Portfolio.css"
+import logo from "./assets/img/portfolioSelfie2.jpg"
+import { CustomLink } from "./components/CustomLink"
+import { Particles } from "react-tsparticles"
+import { useState } from "react"
+import { Section } from "./components/Section"
+import { SkillItem } from "./components/SkillItem"
 
-const certsLoop = (certs) => {
-  let links = [];
-  for (let i = 0; i < certs.length; i++) {
-    const name = certs[i].name;
-    const link = certs[i].link;
-    links.push(
-      <a
-        className="link"
-        key={i + 1}
-        href={link}
-        target="_blank"
-        rel="noreferrer noopener"
-      >
-        {name}
-      </a>
-    );
-    i !== certs.length - 1 ? links.push(",") : links.push("");
-  }
-  return links;
-};
 const linksLoop = (links) => {
-  let x = [];
+  let x = []
   for (let i = 0; i < links.length; i++) {
-    const l = links[i];
-    x.push(<CustomLink link={l} key={l.name} />);
+    const l = links[i]
+    x.push(<CustomLink link={l} key={l.name} />)
   }
-  return x;
-};
+  return x
+}
 
 const Portfolio = (props) => {
-  const [width, setWidth] = useState(window.innerWidth);
-  const isMobile = width <= 768;
+  const [width, setWidth] = useState(window.innerWidth)
+  const isMobile = width <= 768
   return (
     <>
       <Particles
         params={{
-          fpsLimit: 120,
-          pauseOnBlur: false,
+          fpsLimit: isMobile ? 60 : 80,
+          pauseOnBlur: true,
           particles: {
             color: {
               value: "#fff",
@@ -87,7 +67,7 @@ const Portfolio = (props) => {
                 quantity: 1,
               },
               repulse: {
-                distance: 100,
+                distance: 50,
                 duration: 0.4,
               },
             },
@@ -109,7 +89,7 @@ const Portfolio = (props) => {
           }}
         >
           {props.me.sections.map((element) => {
-            return <Section section={element} />;
+            return <Section section={element} />
           })}
         </div>
 
@@ -275,6 +255,6 @@ const Portfolio = (props) => {
         {linksLoop(props.me.links)}
       </div>
     </>
-  );
-};
-export default Portfolio;
+  )
+}
+export default Portfolio

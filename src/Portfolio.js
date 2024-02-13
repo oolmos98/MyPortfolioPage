@@ -16,7 +16,7 @@ const linksLoop = (links) => {
 }
 
 const Portfolio = (props) => {
-  const [width, setWidth] = useState(window.innerWidth)
+  const [width] = useState(window.innerWidth)
   const isMobile = width <= 768
   return (
     <>
@@ -34,7 +34,7 @@ const Portfolio = (props) => {
             number: {
               density: {
                 enable: true,
-                area: 850,
+                area: 1200,
               },
               value: isMobile ? 40 : 50,
             },
@@ -68,7 +68,7 @@ const Portfolio = (props) => {
               },
               repulse: {
                 distance: 50,
-                duration: 0.4,
+                duration: 1,
               },
             },
           },

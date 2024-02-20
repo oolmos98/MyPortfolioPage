@@ -1,79 +1,115 @@
-import "./Portfolio.css"
-import logo from "./assets/img/portfolioSelfie2.jpg"
-import { CustomLink } from "./components/CustomLink"
-import { Particles } from "react-tsparticles"
-import { useState } from "react"
-import { Section } from "./components/Section"
-import { SkillItem } from "./components/SkillItem"
+import "./Portfolio.css";
+import logo from "./assets/img/portfolioSelfie2.jpg";
+import { CustomLink } from "./components/CustomLink";
+import Particles, { initParticlesEngine } from "@tsparticles/react";
+import { loadSlim } from "@tsparticles/slim"; // if you are going to use `loadSlim`, install the "@tsparticles/slim" package too.
+import { useState, useEffect, useMemo } from "react";
+import { Section } from "./components/Section";
+import { SkillItem } from "./components/SkillItem";
 
 const linksLoop = (links) => {
-  let x = []
+  let x = [];
   for (let i = 0; i < links.length; i++) {
-    const l = links[i]
-    x.push(<CustomLink link={l} key={l.name} />)
+    const l = links[i];
+    x.push(<CustomLink link={l} key={l.name} />);
   }
-  return x
-}
+  return x;
+};
 
 const Portfolio = (props) => {
-  const [width] = useState(window.innerWidth)
-  const isMobile = width <= 768
+  const [width] = useState(window.innerWidth);
+  const isMobile = width <= 768;
+
+  // this should be run only once per application lifetime
+  useEffect(() => {
+    initParticlesEngine(async (engine) => {
+      // you can initiate the tsParticles instance (engine) here, adding custom shapes or presets
+      // this loads the tsparticles package bundle, it's the easiest method for getting everything ready
+      // starting from v2 you can add only the features you need reducing the bundle size
+      await loadSlim(engine);
+    }).then(() => {
+      console.log("Loaded Particles Engine");
+    });
+  }, []);
+
+  // Options for Particles
+  const options = useMemo(
+    () => ({
+      // background: {
+      //   color: {
+      //     value: "#0d47a1",
+      //   },
+      // },
+      fpsLimit: isMobile ? 60 : 120,
+      pauseOnBlue: true,
+      pauseOnOutsideViewport: true,
+      interactivity: {
+        events: {
+          onClick: {
+            enable: true,
+            mode: "push",
+          },
+          onHover: {
+            enable: true,
+            mode: "repulse",
+          },
+        },
+        modes: {
+          push: {
+            quantity: 4,
+          },
+          repulse: {
+            distance: 150,
+            duration: 0.4,
+          },
+        },
+      },
+      fullScreen: {
+        enable: true,
+        zIndex: 0,
+      },
+      particles: {
+        color: {
+          value: "#ffffff",
+        },
+        links: {
+          color: "#000",
+          distance: 150,
+          enable: true,
+          opacity: 1,
+          width: 2,
+        },
+        move: {
+          direction: "none",
+          enable: true,
+          outModes: {
+            default: "bounce",
+          },
+          random: false,
+          speed: 4,
+          straight: false,
+        },
+        number: {
+          density: {
+            enable: true,
+          },
+          value: 80,
+        },
+        shape: {
+          type: "circle",
+        },
+        size: {
+          value: { min: 1, max: 4 },
+        },
+      },
+      detectRetina: true,
+    }),
+    []
+  );
+
   return (
     <>
-      <Particles
-        params={{
-          fpsLimit: isMobile ? 60 : 80,
-          pauseOnBlur: true,
-          particles: {
-            color: {
-              value: "#fff",
-            },
-            opacity: {
-              value: 1,
-            },
-            number: {
-              density: {
-                enable: true,
-                area: 1200,
-              },
-              value: isMobile ? 40 : 50,
-            },
-            links: {
-              enable: true,
-              color: "#000",
-              distance: 90,
-              opacity: 1,
-              width: 2,
-            },
-            move: {
-              enable: true,
-              outMode: "bounce",
-            },
-          },
-          interactivity: {
-            events: {
-              onClick: {
-                enable: true,
-                mode: "push",
-              },
-              onHover: {
-                enable: true,
-                mode: "repulse",
-              },
-              resize: true,
-            },
-            modes: {
-              push: {
-                quantity: 1,
-              },
-              repulse: {
-                distance: 50,
-                duration: 1,
-              },
-            },
-          },
-        }}
-      />
+      <Particles options={options} />
       <div className="intro floating">
         <img className="logo" src={logo} alt="This is my selfie" />
 
@@ -89,7 +125,7 @@ const Portfolio = (props) => {
           }}
         >
           {props.me.sections.map((element) => {
-            return <Section section={element} />
+            return <Section section={element} />;
           })}
         </div>
 
@@ -255,6 +291,6 @@ const Portfolio = (props) => {
         {linksLoop(props.me.links)}
       </div>
     </>
-  )
-}
-export default Portfolio
+  );
+};
+export default Portfolio;

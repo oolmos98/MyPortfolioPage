@@ -2,7 +2,7 @@ body {
   text-align: center;
   padding-top: 55px;
   padding-bottom: 55px;
-  background-color: black !important;
+  /* 
   background: linear-gradient(
       177deg,
       rgba(52, 114, 170, 0.5) 0%,
@@ -10,7 +10,14 @@ body {
       rgb(64, 156, 237) 75%,
       rgb(64, 156, 237) 100%
     )
-    no-repeat center center fixed;
+    no-repeat center center fixed; */
+  background-color: black !important;
+  background: linear-gradient(176deg, #0064a5, #5da6d6, #003fa5);
+  background-size: 600% 600%;
+
+  -webkit-animation: AnimatedGradient 29s ease infinite;
+  -moz-animation: AnimatedGradient 29s ease infinite;
+  animation: AnimatedGradient 29s ease infinite;
 }
 h1 {
   font-weight: 400;
@@ -101,5 +108,48 @@ h1 {
   }
   to {
     opacity: 100;
+  }
+}
+
+/* .css-selector {
+  background: linear-gradient(176deg, #0b89db, #2080bf, #0d94a1, #0453d2);
+  background-size: 800% 800%;
+
+  -webkit-animation: AnimatedGradient 19s ease infinite;
+  -moz-animation: AnimatedGradient 19s ease infinite;
+  animation: AnimatedGradient 19s ease infinite;
+} */
+
+@-webkit-keyframes AnimatedGradient {
+  0% {
+    background-position: 52% 0%;
+  }
+  50% {
+    background-position: 49% 100%;
+  }
+  100% {
+    background-position: 52% 0%;
+  }
+}
+@-moz-keyframes AnimatedGradient {
+  0% {
+    background-position: 52% 0%;
+  }
+  50% {
+    background-position: 49% 100%;
+  }
+  100% {
+    background-position: 52% 0%;
+  }
+}
+@keyframes AnimatedGradient {
+  0% {
+    background-position: 52% 0%;
+  }
+  50% {
+    background-position: 49% 100%;
+  }
+  100% {
+    background-position: 52% 0%;
   }
 }

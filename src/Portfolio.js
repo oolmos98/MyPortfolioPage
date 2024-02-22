@@ -19,6 +19,7 @@ const linksLoop = (links) => {
 const Portfolio = (props) => {
   const [width] = useState(window.innerWidth);
   const isMobile = width <= 768;
+  const [loadedParticles, setLoadedParticles] = useState(false);
 
   // this should be run only once per application lifetime
   useEffect(() => {
@@ -28,6 +29,7 @@ const Portfolio = (props) => {
       // starting from v2 you can add only the features you need reducing the bundle size
       await loadSlim(engine);
     }).then(() => {
+      setLoadedParticles(true);
       console.log("Loaded Particles Engine");
     });
   }, []);
@@ -40,7 +42,13 @@ const Portfolio = (props) => {
       //     value: "#0d47a1",
       //   },
       // },
-      fpsLimit: isMobile ? 60 : 120,
+      // fpsLimit: isMobile ? 60 : 120,
+      fpsLimit: 120,
+      detectRetina: true,
+      fullScreen: {
+        enable: true,
+        zIndex: 0,
+      },
       pauseOnBlue: true,
       pauseOnOutsideViewport: true,
       interactivity: {
@@ -64,10 +72,7 @@ const Portfolio = (props) => {
           },
         },
       },
-      fullScreen: {
-        enable: true,
-        zIndex: 0,
-      },
+
       particles: {
         color: {
           value: "#ffffff",
@@ -102,14 +107,16 @@ const Portfolio = (props) => {
           value: { min: 1, max: 4 },
         },
       },
-      detectRetina: true,
     }),
     []
   );
 
   return (
     <>
-      <Particles options={options} />
+      <Particles
+        options={options}
+        className={loadedParticles ? "fade-in" : ""}
+      />
       <div className="intro floating">
         <img className="logo" src={logo} alt="This is my selfie" />
 

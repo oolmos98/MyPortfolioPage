@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunkmyportfolio=self.webpackChunkmyportfolio||[]).push([[6701],{6701:function(a,o,l){function t(a){var o=a.context,l=a.particle,t=a.radius,i=a.opacity,r=l.emojiData,e=2*t,n=o.globalAlpha;r&&(o.globalAlpha=i,o.drawImage(r,-t,-t,e,e),o.globalAlpha=n)}l.r(o),l.d(o,{drawEmoji:function(){return t}})}}]);
-//# sourceMappingURL=6701.89a2938a.chunk.js.map

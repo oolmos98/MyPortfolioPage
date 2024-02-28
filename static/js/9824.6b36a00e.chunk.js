@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunkmyportfolio=self.webpackChunkmyportfolio||[]).push([[9824],{9824:(o,s,i)=>{i.d(s,{absorb:()=>u});var e=i(4409);const t=.5,d=10,a=0;function n(o,s,i,n,u,c){const r=(0,e.qE)(o.options.collisions.absorb.speed*u.factor/d,a,n);o.size.value+=r*t,i.size.value-=r,n<=c&&(i.size.value=0,i.destroy())}function u(o,s,i,e){const t=o.getRadius(),d=s.getRadius();void 0===t&&void 0!==d?o.destroy():void 0!==t&&void 0===d?s.destroy():void 0!==t&&void 0!==d&&(t>=d?n(o,0,s,d,i,e):n(s,0,o,t,i,e))}}}]);
-//# sourceMappingURL=9824.6b36a00e.chunk.js.map

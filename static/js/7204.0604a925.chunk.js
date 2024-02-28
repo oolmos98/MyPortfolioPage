@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunkmyportfolio=self.webpackChunkmyportfolio||[]).push([[7204],{7204:(a,e,i)=>{i.d(e,{CircleDrawer:()=>r});var n=i(4409);class r{async draw(a){const{drawCircle:e}=await i.e(9368).then(i.bind(i,9368));e(a)}getSidesCount(){return 12}async particleInit(a,e){const i=e.shapeData,r=i?.angle??{max:360,min:0};e.circleRange=(0,n.Gv)(r)?{min:(0,n.pu)(r.min),max:(0,n.pu)(r.max)}:{min:0,max:(0,n.pu)(r)},await Promise.resolve()}}}}]);
-//# sourceMappingURL=7204.0604a925.chunk.js.map

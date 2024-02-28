@@ -31,7 +31,7 @@ const Portfolio = (props) => {
           }}
         >
           {props.me.sections.map((element) => {
-            return <Section section={element} />;
+            return <Section key={element} section={element} />;
           })}
         </div>
 

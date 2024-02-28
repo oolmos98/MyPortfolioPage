@@ -37,6 +37,7 @@ const App = () => {
           onHover: {
             enable: true,
             mode: "repulse",
+            // mode: "grab",
           },
         },
         modes: {

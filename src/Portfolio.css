@@ -1,7 +1,7 @@
 body {
   text-align: center;
-  padding-top: 55px;
-  padding-bottom: 55px;
+  /* padding-top: 55px;
+  padding-bottom: 55px; */
   /* 
   background: linear-gradient(
       177deg,
@@ -12,7 +12,7 @@ body {
     )
     no-repeat center center fixed; */
   background-color: black !important;
-  background: linear-gradient(176deg, #0064a5, #5da6d6, #003fa5);
+  background: linear-gradient(176deg, #0064a5, #2595df, #003fa5);
   background-size: 600% 600%;
 
   -webkit-animation: AnimatedGradient 29s ease infinite;
@@ -28,10 +28,12 @@ h1 {
 .intro {
   word-spacing: 2px;
   text-shadow: 0px 0.5px 20px #676767;
-  padding-top: 15px;
-  padding-bottom: 40px;
+  padding-top: 70px;
+  padding-bottom: 95px;
   padding-left: 40px;
   padding-right: 40px;
+  /* padding-top: 55px;
+  padding-bottom: 55px; */
 }
 .logo {
   border: 2px solid white;
@@ -74,7 +76,7 @@ h1 {
   animation-duration: 2s;
   animation-iteration-count: infinite;
   animation-timing-function: ease-in-out;
-  margin-top: 5px;
+  /* margin-top: 5px; */
 }
 @keyframes floating {
   0% {

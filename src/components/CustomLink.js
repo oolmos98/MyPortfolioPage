@@ -1,5 +1,5 @@
-import React from "react"
-import { motion } from "framer-motion"
+import React from "react";
+import { motion } from "framer-motion";
 
 export const CustomLink = (props) => {
   return (
@@ -30,5 +30,5 @@ export const CustomLink = (props) => {
         <br />
       </div>
     </>
-  )
-}
+  );
+};

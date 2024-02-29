@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunkmyportfolio=self.webpackChunkmyportfolio||[]).push([[7604],{7604:(t,e,s)=>{s.d(e,{StarDrawer:()=>n});var a=s(4409);const o=0,r=0;class n{draw(t){!function(t){const{context:e,particle:s,radius:a}=t,n=s.sides,i=s.starInset??2;e.moveTo(o,r-a);for(let c=0;c<n;c++)e.rotate(Math.PI/n),e.lineTo(o,r-a*i),e.rotate(Math.PI/n),e.lineTo(o,r-a)}(t)}getSidesCount(t){const e=t.shapeData;return Math.round((0,a.VG)(e?.sides??5))}particleInit(t,e){const s=e.shapeData;e.starInset=(0,a.VG)(s?.inset??2)}}}}]);
-//# sourceMappingURL=7604.34dfd170.chunk.js.map

@@ -24,13 +24,13 @@ const whoami = {
   ],
   links: [
     {
-      name: "Linkedin",
+      name: "LinkedIn",
       image:
         "https://www.transparentpng.com/thumb/linkedin/linkedin-icon-png-4.png",
       link: "https://www.linkedin.com/in/oolmos/",
     },
     {
-      name: "Github",
+      name: "GitHub",
       image: "https://cdn-icons-png.flaticon.com/512/25/25231.png",
       link: "https://github.com/oolmos98",
     },

@@ -38,6 +38,12 @@ const App = () => {
     };
   }, [vantaEffect]);
 
+  useEffect(() => {
+    window.onbeforeunload = function () {
+      window.scrollTo(0, 0);
+    };
+  }, []);
+
   // // Options for Particles
   // const options = useMemo(
   //   () => ({

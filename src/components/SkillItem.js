@@ -1,5 +1,5 @@
-import React from "react"
-import { motion } from "framer-motion"
+import React from "react";
+import { motion } from "framer-motion";
 
 export const SkillItem = ({ logo, skill }) => {
   return (
@@ -12,6 +12,8 @@ export const SkillItem = ({ logo, skill }) => {
       transition={{
         ease: "linear",
         duration: 0.75,
+        type: "spring",
+        stiffness: 100,
       }}
     >
       <div
@@ -35,5 +37,5 @@ export const SkillItem = ({ logo, skill }) => {
         <h3>{skill}</h3>
       </div>
     </motion.div>
-  )
-}
+  );
+};

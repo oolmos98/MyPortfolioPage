@@ -42,10 +42,11 @@ const Portfolio = (props) => {
         {props.me.sections.map((l, i) => {
           return (
             <motion.span
-              initial={{ opacity: 0, scale: 0.5 }}
+              initial={{ opacity: 0, scale: 0.5, display: "none" }}
               animate={{
                 opacity: 1,
                 scale: 1,
+                display: "initial",
               }}
               transition={{
                 duration: 0.75,
@@ -62,8 +63,8 @@ const Portfolio = (props) => {
         })}
       </div>
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
+        initial={{ opacity: 0, display: "none" }}
+        animate={{ opacity: 1, display: "initial" }}
         transition={{
           duration: 0.75,
           delay: props.me.sections.length,
@@ -73,6 +74,7 @@ const Portfolio = (props) => {
         <div
           style={{
             width: "100%",
+            height: "fit-content !important",
           }}
         >
           <h1>Here are technologies I have worked with:</h1>

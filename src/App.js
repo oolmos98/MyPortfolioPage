@@ -26,10 +26,10 @@ const App = () => {
           // color2: 0x818d9,
           scale: 1.0,
           scaleMobile: 1.0,
-          colorMode: "variance",
-          speedLimit: 2.0,
-          quantity: 4.0,
+          speedLimit: 1.5,
           separation: 82.0,
+          wingSpan: 40.0,
+          quantity: 4,
         })
       );
     }

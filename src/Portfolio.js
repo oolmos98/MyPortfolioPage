@@ -21,9 +21,10 @@ const Portfolio = (props) => {
         animate={{
           opacity: 1,
           scale: 1,
+          rotate: 0,
         }}
-        initial={{ opacity: 0, scale: 0.5 }}
-        transition={{ duration: 1, type: "spring", stiffness: 100 }}
+        initial={{ opacity: 0, scale: 0.5, rotate: 20 }}
+        transition={{ duration: 2, type: "spring", stiffness: 100 }}
       >
         <img className="logo" src={logo} alt="This is my selfie" />
       </motion.div>
@@ -42,11 +43,17 @@ const Portfolio = (props) => {
         {props.me.sections.map((l, i) => {
           return (
             <motion.span
-              initial={{ opacity: 0, scale: 0.5, display: "none" }}
+              initial={{
+                opacity: 0,
+                scale: 0.5,
+                display: "none",
+                rotate: i % 2 === 0 ? 20 : -20,
+              }}
               animate={{
                 opacity: 1,
                 scale: 1,
                 display: "initial",
+                rotate: 0,
               }}
               transition={{
                 duration: 0.75,
@@ -63,18 +70,18 @@ const Portfolio = (props) => {
         })}
       </div>
       <motion.div
-        initial={{ opacity: 0, display: "none" }}
-        animate={{ opacity: 1, display: "initial" }}
+        initial={{ opacity: 0, display: "none", x: -10 }}
+        animate={{ opacity: 1, display: "initial", x: 0 }}
         transition={{
           duration: 0.75,
-          delay: props.me.sections.length,
+          delay: props.me.sections.length + 0.5,
         }}
         key={"span-motion"}
       >
         <div
           style={{
             width: "100%",
-            height: "fit-content !important",
+            // height: "fit-content !important",
           }}
         >
           <h1>Here are technologies I have worked with:</h1>

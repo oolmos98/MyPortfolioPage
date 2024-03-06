@@ -1,16 +1,6 @@
 body {
   text-align: center;
-  /* padding-top: 55px;
-  padding-bottom: 55px; */
-  /* 
-  background: linear-gradient(
-      177deg,
-      rgba(52, 114, 170, 0.5) 0%,
-      rgba(52, 114, 170, 1) 35%,
-      rgb(64, 156, 237) 75%,
-      rgb(64, 156, 237) 100%
-    )
-    no-repeat center center fixed; */
+
   background-color: black !important;
   background: linear-gradient(176deg, #0064a5, #2595df, #003fa5);
   background-size: 600% 600%;
@@ -30,11 +20,12 @@ h1 {
   text-shadow: 0px 0.5px 20px #676767;
   padding-top: 70px;
   padding-bottom: 95px;
-  padding-left: 40px;
-  padding-right: 40px;
-  height: fit-content;
-  /* padding-top: 55px;
-  padding-bottom: 55px; */
+  padding-left: 60px;
+  padding-right: 60px;
+  background: transparent;
+  min-height: 50vh;
+  position: relative;
+  z-index: 10;
 }
 .logo {
   border: 2px solid white;
@@ -45,6 +36,7 @@ h1 {
   outline-color: #ffffff;
   border-radius: 50%;
   margin-bottom: 25px;
+  /* z-index: 10; */
 }
 #customLink {
   margin-top: 20px;

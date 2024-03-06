@@ -43,7 +43,6 @@ const App = () => {
   return (
     <div>
       <div className="container" ref={myRef} />
-
       <AnimatedCursor
         innerSize={15}
         outerSize={15}

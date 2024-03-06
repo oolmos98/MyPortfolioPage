@@ -18,7 +18,7 @@ const linksLoop = (links) => {
 const Portfolio = (props) => {
   const [animationComplete, setAnimationComplete] = useState(false);
   return (
-    <div className={`intro ${animationComplete ? "floating" : ""}`}>
+    <div className={`intro${animationComplete ? " floating" : ""}`}>
       <motion.div
         animate={{
           opacity: 1,
@@ -27,6 +27,7 @@ const Portfolio = (props) => {
         }}
         initial={{ opacity: 0, scale: 0.5, rotate: 40 }}
         transition={{ duration: 2, type: "spring", stiffness: 50 }}
+        // layout="position"
       >
         <img className="logo" src={logo} alt="This is my selfie" />
       </motion.div>
@@ -64,6 +65,7 @@ const Portfolio = (props) => {
                 stiffness: 50,
               }}
               key={i}
+              layout="position"
             >
               <Section key={l} section={l} />
             </motion.span>

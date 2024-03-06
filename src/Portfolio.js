@@ -1,3 +1,4 @@
+import { useState } from "react";
 import "./Portfolio.css";
 import logo from "./assets/img/portfolioSelfie2.jpg";
 import { CustomLink } from "./components/CustomLink";
@@ -15,16 +16,17 @@ const linksLoop = (links) => {
 };
 
 const Portfolio = (props) => {
+  const [animationComplete, setAnimationComplete] = useState(false);
   return (
-    <div className="intro floating">
+    <div className={`intro ${animationComplete ? "floating" : ""}`}>
       <motion.div
         animate={{
           opacity: 1,
           scale: 1,
           rotate: 0,
         }}
-        initial={{ opacity: 0, scale: 0.5, rotate: 20 }}
-        transition={{ duration: 2, type: "spring", stiffness: 100 }}
+        initial={{ opacity: 0, scale: 0.5, rotate: 40 }}
+        transition={{ duration: 2, type: "spring", stiffness: 50 }}
       >
         <img className="logo" src={logo} alt="This is my selfie" />
       </motion.div>
@@ -45,7 +47,7 @@ const Portfolio = (props) => {
             <motion.span
               initial={{
                 opacity: 0,
-                scale: 0.5,
+                scale: 0.2,
                 display: "none",
                 rotate: i % 2 === 0 ? 20 : -20,
               }}
@@ -59,7 +61,7 @@ const Portfolio = (props) => {
                 duration: 0.75,
                 delay: i + 1 - 0.25,
                 type: "spring",
-                stiffness: 100,
+                stiffness: 50,
               }}
               key={i}
             >
@@ -77,6 +79,7 @@ const Portfolio = (props) => {
           delay: props.me.sections.length + 0.5,
         }}
         key={"span-motion"}
+        onAnimationComplete={() => setAnimationComplete(true)}
       >
         <div
           style={{

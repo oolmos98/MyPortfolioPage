@@ -26,7 +26,17 @@ const Portfolio = (props) => {
           rotate: 0,
         }}
         initial={{ opacity: 0, scale: 0.5, rotate: 40 }}
-        transition={{ duration: 2, type: "spring", stiffness: 50 }}
+        transition={{
+          duration: 3,
+          type: "spring",
+          stiffness: 260,
+          // damping: 20,
+        }}
+        whileTap={{
+          scale: 0.8,
+          rotate: -90,
+        }}
+
         // layout="position"
       >
         <img className="logo" src={logo} alt="This is my selfie" />
@@ -48,7 +58,7 @@ const Portfolio = (props) => {
             <motion.span
               initial={{
                 opacity: 0,
-                scale: 0.2,
+                scale: i % 2 === 0 ? 0.2 : 0.1,
                 display: "none",
                 rotate: i % 2 === 0 ? 20 : -20,
               }}
@@ -61,8 +71,8 @@ const Portfolio = (props) => {
               transition={{
                 duration: 0.75,
                 delay: i + 1 - 0.25,
-                type: "spring",
-                stiffness: 50,
+                stiffness: 260,
+                damping: 20,
               }}
               key={i}
               layout="position"

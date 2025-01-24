@@ -20,7 +20,7 @@ const App = () => {
       //   },
       // },
       // fpsLimit: isMobile ? 60 : 120,
-      fpsLimit: 120,
+      fpsLimit: 60,
       detectRetina: true,
       fullScreen: {
         enable: true,

@@ -1,8 +1,5 @@
 .section-container {
   display: block;
   width: 60vw;
-  /* border: 2px dotted black; */
 }
-h1 {
-  color: rgb(0, 0, 0);
-}
+

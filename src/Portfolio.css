@@ -11,8 +11,9 @@ body {
       rgb(64, 156, 237) 100%
     )
     no-repeat center center fixed; */
+    /* background: linear-gradient(176deg, #0064a5, #5da6d6, #003fa5); */
+
   background-color: black !important;
-  background: linear-gradient(176deg, #0064a5, #5da6d6, #003fa5);
   background-size: 600% 600%;
 
   -webkit-animation: AnimatedGradient 29s ease infinite;
@@ -27,7 +28,6 @@ h1 {
 }
 .intro {
   word-spacing: 2px;
-  text-shadow: 0px 0.5px 20px #676767;
   padding-top: 15px;
   padding-bottom: 40px;
   padding-left: 40px;

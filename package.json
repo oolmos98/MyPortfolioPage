@@ -1,17 +1,16 @@
 {
   "homepage": "https://www.omarolmos.com",
   "name": "myportfolio",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "dependencies": {
-    "@tsparticles/react": "^3.0.0",
-    "@tsparticles/slim": "^3.2.2",
     "framer-motion": "^10.16.4",
-    "react": "19.0.0",
+    "react": "^18.2.0",
     "react-animated-cursor": "^2.11.2",
-    "react-dom": "19.0.0",
+    "react-dom": "^18.2.0",
     "react-router-dom": "^6.2.1",
-    "react-scripts": "^5.0.0",
+    "react-scripts": "^5.0.1",
+    "vanta": "^0.5.24",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

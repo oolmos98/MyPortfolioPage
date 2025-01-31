@@ -13,8 +13,8 @@ const App = () => {
       setVantaEffect(HALO({
         el: myRef.current,
         mouseControls: true,
-        touchControls: true,
-        gyroControls: false,
+        touchControls: false,
+        gyroControls: true,
         baseColor: 0xff,
         backgroundColor: 0x3468,
         amplitudeFactor: 3.00,
@@ -24,7 +24,7 @@ const App = () => {
     return () => {
       if (vantaEffect) vantaEffect.destroy()
     }
-  }, [vantaEffect])
+  }, [])
   return (
     <>
       <div
@@ -34,9 +34,9 @@ const App = () => {
           top: 0,
           left: 0,
           width: '100%',
-          height: '100vh',
+          height: 'calc(100vh - calc(100vh - 100%))',
           zIndex: -1,
-          backgroundSize: '100% 100%',
+          backgroundSize: 'cover',
         }}
       />
       <AnimatedCursor

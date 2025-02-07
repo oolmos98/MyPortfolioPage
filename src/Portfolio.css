@@ -2,8 +2,8 @@ body {
   text-align: center;
   padding-top: 55px;
   padding-bottom: 55px;
-  /* 
-  background: linear-gradient(
+  
+  /* background: linear-gradient(
       177deg,
       rgba(52, 114, 170, 0.5) 0%,
       rgba(52, 114, 170, 1) 35%,
@@ -11,9 +11,9 @@ body {
       rgb(64, 156, 237) 100%
     )
     no-repeat center center fixed; */
-    /* background: linear-gradient(176deg, #0064a5, #5da6d6, #003fa5); */
+    background: linear-gradient(176deg, #0e3752, #032338, #003fa5);
 
-  background-color: black !important;
+  background-color: rgb(0, 0, 0) !important;
   background-size: 600% 600%;
 
   -webkit-animation: AnimatedGradient 29s ease infinite;
@@ -33,15 +33,31 @@ h1 {
   padding-left: 40px;
   padding-right: 40px;
 }
+
 .logo {
-  border: 2px solid white;
   height: 40vmin;
   width: 40vmin;
-  pointer-events: none;
-  box-shadow: 0px 5px 55px #000000;
-  outline-color: #ffffff;
+  border: 3px solid #0000;
   border-radius: 50%;
-  margin-bottom: 25px;
+  /* border-radius: 12px; */
+  background: linear-gradient(#131219, #131219) padding-box, linear-gradient(
+        var(--angle),
+        #00ff77,
+        #000f7d
+      ) border-box;
+  animation: 4s rotate linear infinite;
+}
+
+@keyframes rotate {
+  to {
+    --angle: 360deg;
+  }
+}
+
+@property --angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
 }
 #customLink {
   margin-top: 20px;

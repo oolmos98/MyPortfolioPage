@@ -3,7 +3,6 @@ import logo from "./assets/img/portfolioSelfie2.jpg";
 import { CustomLink } from "./components/CustomLink";
 import { Section } from "./components/Section";
 import { SkillItem } from "./components/SkillItem";
-
 const linksLoop = (links) => {
   let x = [];
   for (let i = 0; i < links.length; i++) {
@@ -18,7 +17,6 @@ const Portfolio = (props) => {
     <>
       <div className="intro floating">
         <img className="logo" src={logo} alt="This is my selfie" />
-
         <div
           style={{
             display: "flex",
@@ -66,6 +64,12 @@ const Portfolio = (props) => {
             />
             <SkillItem
               logo={
+                "https://cdn-icons-png.flaticon.com/512/28/28968.png"
+              }
+              skill={"Java JSP"}
+            />
+            <SkillItem
+              logo={
                 "https://storage.googleapis.com/cms-storage-bucket/0dbfcc7a59cd1cf16282.png"
               }
               skill={"Flutter"}
@@ -110,6 +114,12 @@ const Portfolio = (props) => {
             skill={"Java"}
           />
           <SkillItem
+            logo={
+              "https://img.icons8.com/?size=512&id=90519&format=png"
+            }
+            skill={"Spring Boot"}
+          />
+          <SkillItem
             logo={"https://www.svgrepo.com/show/354245/quarkus-icon.svg"}
             skill={"Quarkus"}
           />
@@ -131,6 +141,49 @@ const Portfolio = (props) => {
             }
             skill={"AWS S3"}
           />
+        </div>
+
+        <h2
+          style={{
+            marginTop: "45px",
+            textDecoration: "underline",
+          }}
+        >
+          Infrastructure:
+        </h2>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            gap: 50,
+            alignItems: "center",
+            flexWrap: "wrap",
+            rowGap: 5,
+          }}
+        >
+          <SkillItem
+            logo={
+              "https://img.icons8.com/m_outlined/600/FFFFFF/amazon-web-services.png"
+            }
+            skill={"Amazon Web Services"}
+          />
+          <SkillItem
+            logo={
+              "https://static-00.iconduck.com/assets.00/terraform-icon-1803x2048-hodrzd3t.png"
+            }
+            skill={"Terraform"}
+          />
+          <SkillItem
+            logo={"https://img.stackshare.io/company/755/c39831d816dd9fbe7b53613823bdf3fb28064818.png"}
+            skill={"Scalr"}
+          />
+          <SkillItem
+            logo={
+              "https://icon.icepanel.io/Technology/svg/Argo-CD.svg"
+            }
+            skill={"Argo CD"}
+          />
+
         </div>
 
         <h2
@@ -163,17 +216,24 @@ const Portfolio = (props) => {
             }
             skill={"IntelliJ IDEA"}
           />
+        
           <SkillItem
             logo={
-              "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Android_Studio_icon_%282023%29.svg/2048px-Android_Studio_icon_%282023%29.svg.png"
+              "https://docs.usebruno.com/bruno.png"
             }
-            skill={"Android Studio"}
+            skill={"Bruno"}
           />
           <SkillItem
             logo={
               "https://static-00.iconduck.com/assets.00/apps-insomnia-icon-512x512-dse2p0fm.png"
             }
             skill={"Insomnia"}
+          />
+          <SkillItem
+            logo={
+              "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Diagrams.net_Logo.svg/2048px-Diagrams.net_Logo.svg.png"
+            }
+            skill={"Draw.io"}
           />
           <SkillItem
             logo={"https://www.svgrepo.com/show/448271/azure-devops.svg"}
@@ -189,11 +249,18 @@ const Portfolio = (props) => {
             logo={"https://cdn-icons-png.flaticon.com/512/25/25231.png"}
             skill={"GitHub"}
           />
+          
+          <SkillItem
+            logo={
+              "https://gitlab.com/uploads/-/system/group/avatar/6543/logo-extra-whitespace.png"
+            }
+            skill={"GitLab"}
+          />
         </div>
         <br />
         <br />
 
-        <h1>To learn more about me, here are relevant links!</h1>
+        <h1>Check out these links!</h1>
         {linksLoop(props.me.links)}
       </div>
     </>

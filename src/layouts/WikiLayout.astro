@@ -1,0 +1,48 @@
+---
+import { ClientRouter } from "astro:transitions";
+import "../styles/global.css";
+const { title, description } = Astro.props.frontmatter ?? Astro.props;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content={description} />
+    <ClientRouter />
+    <link rel="icon" href="/favicon.svg" />
+    <title>{title} | Omar Olmos</title>
+  </head>
+  <body class="wiki-page">
+    <header class="site-header">
+      <a class="wordmark" href="/">
+        OO<span>.</span>
+      </a>
+      <nav aria-label="Main navigation">
+        <a href="/wiki/">Wiki</a>
+        <a href="/#work">Work</a>
+        <a
+          class="nav-contact"
+          href="https://www.linkedin.com/in/oolmos/"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Let's connect <span aria-hidden="true">↗</span>
+        </a>
+      </nav>
+    </header>
+    <main class="wiki-shell">
+      <div class="wiki-navigation">
+        <a class="wiki-back" href="/wiki/">
+          ← Back to wiki
+        </a>
+        <a class="wiki-back" href="/">
+          Portfolio ↗
+        </a>
+      </div>
+      <article class="wiki-content">
+        <slot />
+      </article>
+    </main>
+  </body>
+</html>

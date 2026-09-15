@@ -20,13 +20,10 @@
     "preview": "astro preview",
     "format": "prettier --write \"src/**/*.{astro,js,jsx,css,md}\" \"astro.config.mjs\" \"package.json\"",
     "format:check": "prettier --check \"src/**/*.{astro,js,jsx,css,md}\" \"astro.config.mjs\" \"package.json\"",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist",
     "test": "astro check"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.6",
-    "gh-pages": "^6.1.1",
     "prettier": "^3.9.6",
     "prettier-plugin-astro": "^1.0.0",
     "typescript": "^5.9.3"

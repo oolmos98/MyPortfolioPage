@@ -38,12 +38,6 @@ In the repository settings, configure GitHub Pages as:
 
 The custom domain is preserved by `public/CNAME` during the Astro build.
 
-The local fallback deployment command is:
-
-```bash
-npm run deploy
-```
-
 ## Content
 
 - Portfolio homepage: `src/pages/index.astro`

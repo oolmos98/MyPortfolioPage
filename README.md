@@ -1,70 +1,52 @@
-# Getting Started with Create React App
+# Omar Olmos Portfolio
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+An Astro portfolio and engineering wiki with React islands for interactive
+content.
 
-## Available Scripts
+## Local development
 
-In the project directory, you can run:
+Install dependencies and start the development server:
 
-### `npm start`
+```bash
+npm ci
+npm run dev
+```
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+The site is available at `http://localhost:4321`.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Checks
 
-### `npm test`
+```bash
+npm run format:check
+npm run test
+npm run build
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+`npm run test` runs `astro check`. The production output is generated in
+`dist/`.
 
-### `npm run build`
+## Deployment
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+The workflow in `.github/workflows/deploy.yml` deploys automatically to GitHub
+Pages after pushes to `main`. It can also be started manually from the GitHub
+Actions tab with **Deploy Astro site -> Run workflow**.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+In the repository settings, configure GitHub Pages as:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- Source: **GitHub Actions**
+- Custom domain: `www.omarolmos.com`
 
-### `npm run eject`
+The custom domain is preserved by `public/CNAME` during the Astro build.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+The local fallback deployment command is:
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```bash
+npm run deploy
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## Content
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- Portfolio homepage: `src/pages/index.astro`
+- Engineering wiki: `src/pages/wiki/`
+- Shared wiki layout: `src/layouts/WikiLayout.astro`
+- Global styles: `src/styles/global.css`

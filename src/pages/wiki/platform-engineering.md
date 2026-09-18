@@ -25,7 +25,7 @@ Below is the standard runtime request flow and GitOps delivery loop for cloud-na
             |                                        |
             v (Pull / Reconcile)                     v
 +-------------------------------------------------------------------+
-|  ROSA / OpenShift Cluster                                         |
+|  ROSA / OpenShift Cluster (Private Compute)                       |
 |                                                                   |
 |  +-----------------------+     +-------------------------------+  |
 |  | Argo CD / GitOps      | --> | OpenShift Ingress (HAProxy)   |  |

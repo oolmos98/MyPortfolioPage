@@ -23,6 +23,7 @@
 }
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 body {
   margin: 0;
@@ -30,6 +31,15 @@ body {
   color: var(--ink);
   font-family: var(--sans);
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  position: relative;
+  width: 100%;
+}
+img,
+svg,
+picture {
+  max-width: 100%;
+  height: auto;
 }
 a {
   color: inherit;
@@ -307,9 +317,17 @@ h2 {
 .project-row:last-child {
   border-bottom: 1px solid var(--line);
 }
-.project-row:hover {
-  padding-left: 15px;
-  padding-right: 15px;
+@media (hover: hover) {
+  .project-row:hover {
+    padding-left: 15px;
+    padding-right: 15px;
+    background: var(--acid);
+  }
+  .project-row:hover .project-arrow {
+    transform: translate(3px, -3px);
+  }
+}
+.project-row:active {
   background: var(--acid);
 }
 .project-row:focus-visible {
@@ -319,7 +337,6 @@ h2 {
   outline: 2px solid var(--ink);
   outline-offset: -2px;
 }
-.project-row:hover .project-arrow,
 .project-row:focus-visible .project-arrow {
   transform: translate(3px, -3px);
 }
@@ -378,7 +395,18 @@ h2 {
 }
 .skill-pill {
   cursor: default;
-  transition: color 0.2s ease;
+  display: inline-block;
+  transition:
+    transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+@media (hover: hover) {
+  .skill-pill:hover {
+    transform: translateY(-3px);
+    background-color: var(--acid);
+    border-color: var(--ink);
+  }
 }
 .contact-section {
   border-top: 1px solid var(--line);
@@ -551,12 +579,14 @@ h2 {
 }
 .wiki-content pre {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   margin: 28px 0;
-  padding: 22px;
+  padding: 20px 22px;
   background: var(--ink);
   color: var(--paper);
-  font: 14px/1.7 var(--mono);
+  font: 13.5px/1.7 var(--mono);
   position: relative;
+  border-radius: 2px;
 }
 .code-block-wrapper pre {
   margin: 0;
@@ -591,6 +621,47 @@ h2 {
   background: var(--acid);
   color: var(--ink);
   border-color: var(--acid);
+}
+
+/* Markdown Tables */
+.wiki-content table {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-collapse: collapse;
+  margin: 32px 0;
+  border: 1px solid var(--line);
+  background: rgba(24, 35, 31, 0.015);
+}
+.wiki-content thead {
+  background: rgba(24, 35, 31, 0.04);
+}
+.wiki-content th,
+.wiki-content td {
+  padding: 12px 16px;
+  border: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+.wiki-content th {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.wiki-content td {
+  color: var(--muted);
+  font-size: 14px;
+  min-width: 130px;
+  line-height: 1.55;
+}
+.wiki-content tr:nth-child(even) td {
+  background: rgba(24, 35, 31, 0.02);
 }
 .wiki-meta {
   display: flex;
@@ -635,10 +706,16 @@ h2 {
   grid-column: 2;
   text-align: right;
 }
-.pager-card:hover {
+@media (hover: hover) {
+  .pager-card:hover {
+    background: var(--acid);
+    border-color: var(--ink);
+    transform: translateY(-2px);
+  }
+}
+.pager-card:active {
   background: var(--acid);
   border-color: var(--ink);
-  transform: translateY(-2px);
 }
 .pager-card:focus-visible {
   outline: 2px solid var(--ink);
@@ -657,15 +734,6 @@ h2 {
   letter-spacing: -0.02em;
   color: var(--ink);
 }
-@media (max-width: 600px) {
-  .wiki-pager {
-    grid-template-columns: 1fr;
-  }
-  .pager-card.next {
-    grid-column: 1;
-    text-align: left;
-  }
-}
 .wiki-content blockquote {
   margin: 35px 0;
   padding: 15px 25px;
@@ -681,107 +749,337 @@ h2 {
   animation-duration: 0.35s;
   animation-timing-function: ease-out;
 }
-@media (max-width: 700px) {
-  .wiki-shell {
-    width: min(100% - 40px, 860px);
-    padding-top: 45px;
-  }
-  .wiki-content p,
-  .wiki-content li {
-    font-size: 16px;
-  }
-}
-@media (max-width: 700px) {
+
+/* Tablet Responsive Breakpoint */
+@media (max-width: 860px) {
   .site-header,
   .section-wrap {
-    width: min(100% - 40px, 1180px);
+    width: min(100% - 48px, 1180px);
+  }
+  .wiki-shell {
+    width: min(100% - 48px, 860px);
+    padding: 50px 0 90px;
+  }
+  .skill-groups {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .intro-band {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    padding: 70px 0;
+  }
+  .intro-statement {
+    grid-column: 1 / -1;
+  }
+  .intro-details {
+    grid-column: 1 / -1;
+    gap: 32px;
+  }
+}
+
+/* Mobile Phone Responsive Breakpoint */
+@media (max-width: 640px) {
+  .site-header,
+  .section-wrap {
+    width: calc(100% - 32px);
+  }
+  .site-header {
+    padding: 18px 0;
+    gap: 12px;
+  }
+  .wordmark {
+    font-size: 22px;
+  }
+  nav {
+    gap: 12px;
+    font-size: 11px;
   }
   nav a[href="#work"],
-  nav a[href="#capabilities"] {
+  nav a[href="/#work"],
+  nav a[href="#capabilities"],
+  nav a[href="/#capabilities"] {
     display: none;
+  }
+  .search-kbd {
+    display: none;
+  }
+  .search-trigger {
+    padding: 5px 10px;
+    font-size: 11px;
+    gap: 6px;
   }
   .hero {
     min-height: auto;
     grid-template-columns: 1fr;
-    gap: 65px;
-    padding: 80px 0 100px;
+    gap: 36px;
+    padding: 36px 0 55px;
   }
   .hero-copy {
     min-width: 0;
+    width: 100%;
   }
-  .hero h1,
-  .hero h1 em,
-  h2 em {
+  .hero-copy .eyebrow {
+    margin-bottom: 14px;
+    font-size: 11px;
+  }
+  .hero h1 {
+    font-size: clamp(34px, 10vw, 54px);
+    line-height: 1;
+    letter-spacing: -0.05em;
     max-width: 100%;
     overflow-wrap: anywhere;
   }
-  .hero h1 {
-    font-size: clamp(40px, 15vw, 78px);
-  }
   .hero-summary {
+    margin: 18px 0 24px;
+    font-size: 15.5px;
+    line-height: 1.55;
+    max-width: 100%;
     overflow-wrap: anywhere;
   }
   .hero-actions {
-    flex-wrap: wrap;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    width: 100%;
+  }
+  .hero-actions .button {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+    padding: 14px 18px;
+    font-size: 13.5px;
+  }
+  .hero-actions .text-link {
+    width: 100%;
+    text-align: center;
+    padding: 8px 0;
   }
   .hero-portrait {
     justify-self: center;
-    width: min(82vw, 350px);
-    margin-right: 18px;
+    width: min(100%, 280px);
+    margin: 0 auto;
+  }
+  .hero-index {
+    display: none;
   }
   .intro-band {
     display: block;
-    padding: 80px 0;
+    padding: 55px 0;
   }
   .intro-statement {
-    margin: 40px 0;
+    font-size: clamp(22px, 6.5vw, 34px);
+    line-height: 1.15;
+    margin: 20px 0;
   }
   .intro-details {
-    display: block;
-  }
-  .intro-details p + p {
-    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    font-size: 14.5px;
+    line-height: 1.6;
   }
   .work-section,
   .capabilities-section {
-    padding: 95px 0;
+    padding: 65px 0;
   }
   .section-heading {
-    margin-bottom: 45px;
+    margin-bottom: 32px;
   }
-  .project-row {
-    min-width: 0;
-    grid-template-columns: 45px minmax(0, 1fr) 25px;
-    gap: 8px;
-  }
-  .project-content {
-    min-width: 0;
-  }
-  .project-content h3,
-  .project-content p {
+  h2 {
+    font-size: clamp(32px, 8vw, 52px);
+    line-height: 1;
+    letter-spacing: -0.05em;
     overflow-wrap: anywhere;
   }
+  .project-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "number arrow"
+      "content content";
+    row-gap: 10px;
+    column-gap: 8px;
+    padding: 22px 0 26px;
+  }
+  .project-number {
+    grid-area: number;
+    font-size: 11px;
+  }
+  .project-arrow {
+    grid-area: arrow;
+    font-size: 22px;
+    align-self: center;
+  }
+  .project-content {
+    grid-area: content;
+    min-width: 0;
+  }
   .project-content h3 {
-    font-size: 28px;
+    font-size: clamp(22px, 5.5vw, 28px);
+    margin-bottom: 8px;
+    overflow-wrap: anywhere;
+  }
+  .project-content p {
+    font-size: 14px;
+    margin-bottom: 14px;
+    overflow-wrap: anywhere;
+  }
+  .tag-list span {
+    font-size: 11px;
+    padding: 5px 9px;
   }
   .skill-groups {
     grid-template-columns: 1fr;
-    gap: 28px;
+    gap: 20px;
+  }
+  .skill-group {
+    padding-top: 14px;
+  }
+  .skill-label {
+    margin-bottom: 12px;
+    font-size: 12px;
+  }
+  .skill-pill {
+    font-size: 11.5px;
+    padding: 6px 10px;
   }
   .contact-section {
-    padding-top: 95px;
+    padding: 65px 0 25px;
+  }
+  .contact-section h2 {
+    margin-bottom: 24px;
+  }
+  .contact-count {
+    margin-bottom: 20px;
   }
   .contact-email {
-    max-width: 100%;
-    overflow-wrap: anywhere;
+    font-size: clamp(14px, 4.4vw, 22px);
+    gap: 12px;
+    width: 100%;
+    justify-content: space-between;
+    word-break: break-all;
   }
   .contact-footer {
-    margin-top: 100px;
-    display: block;
-    line-height: 2;
+    margin-top: 55px;
+    flex-direction: column;
+    gap: 14px;
+    align-items: flex-start;
+    line-height: 1.6;
   }
   .contact-footer div {
-    margin-top: 12px;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 0;
+  }
+  .wiki-shell {
+    width: calc(100% - 32px);
+    padding: 32px 0 65px;
+  }
+  .wiki-navigation {
+    margin-bottom: 28px;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .wiki-meta {
+    margin: -15px 0 24px;
+    font-size: 11px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .wiki-content h1 {
+    font-size: clamp(30px, 8.5vw, 54px);
+    line-height: 1.05;
+    margin-bottom: 20px;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+  .wiki-content h2 {
+    font-size: clamp(22px, 6vw, 32px);
+    line-height: 1.15;
+    margin: 40px 0 14px;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+  .wiki-content h3 {
+    font-size: clamp(17px, 4.5vw, 22px);
+    margin-top: 26px;
+  }
+  .wiki-content p,
+  .wiki-content li {
+    font-size: 15.5px;
+    line-height: 1.65;
+    max-width: 100%;
+  }
+  .wiki-content ul,
+  .wiki-content ol {
+    padding-left: 20px;
+  }
+  .wiki-content pre {
+    margin: 20px 0;
+    padding: 14px 12px;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+  .copy-code-btn {
+    top: 6px;
+    right: 6px;
+    font-size: 9.5px;
+    padding: 2px 6px;
+  }
+  .wiki-content blockquote {
+    margin: 24px 0;
+    padding: 12px 16px;
+    font-size: 14.5px;
+  }
+  .wiki-pager {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-top: 45px;
+    padding-top: 25px;
+  }
+  .pager-card.next {
+    grid-column: 1;
+    text-align: left;
+  }
+  .pager-card {
+    padding: 15px 16px;
+  }
+  .wiki-footer {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+    margin-top: 55px;
+  }
+}
+
+/* Compact Mobile Breakpoint (<=400px) */
+@media (max-width: 400px) {
+  .site-header {
+    gap: 8px;
+  }
+  .wordmark {
+    font-size: 20px;
+  }
+  nav {
+    gap: 8px;
+    font-size: 10.5px;
+  }
+  .search-trigger {
+    padding: 4px 8px;
+    font-size: 10px;
+  }
+  .hero-actions .button {
+    padding: 12px 14px;
+    font-size: 13px;
+  }
+  .hero-portrait {
+    width: min(100%, 240px);
+  }
+  .wiki-content table th,
+  .wiki-content table td {
+    padding: 8px 10px;
+    font-size: 12px;
   }
 }
 /* Reading Progress Bar */
@@ -850,7 +1148,7 @@ h2 {
   display: none;
   align-items: flex-start;
   justify-content: center;
-  padding-top: 100px;
+  padding-top: 80px;
 }
 .search-dialog[open] {
   display: flex;
@@ -909,6 +1207,12 @@ h2 {
   color: var(--muted);
   cursor: pointer;
   text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.search-close-btn .mobile-close {
+  display: none;
 }
 .search-close-btn:hover {
   background: var(--ink);
@@ -977,20 +1281,73 @@ h2 {
   background: rgba(24, 35, 31, 0.02);
 }
 
+@media (max-width: 640px) {
+  .search-dialog {
+    padding-top: max(16px, env(safe-area-inset-top));
+    padding-bottom: 16px;
+  }
+  .search-panel {
+    width: calc(100% - 24px);
+    max-height: 85dvh;
+    border-radius: 4px;
+  }
+  .search-header {
+    padding: 12px 14px;
+    gap: 10px;
+  }
+  .search-input {
+    font-size: 16px;
+  }
+  .search-footer {
+    padding: 8px 14px;
+    font-size: 10px;
+  }
+  .search-footer span:first-child {
+    display: none;
+  }
+  .search-close-btn .desktop-esc {
+    display: none;
+  }
+  .search-close-btn .mobile-close {
+    display: inline;
+    font-size: 13px;
+    line-height: 1;
+  }
+}
+
 /* Table of Contents */
 .wiki-toc {
   margin: 0 0 45px;
-  padding: 20px 24px;
+  padding: 18px 22px;
   border: 1px solid var(--line);
   background: rgba(24, 35, 31, 0.02);
+  border-radius: 2px;
 }
-.toc-title {
-  display: block;
+.wiki-toc summary.toc-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  list-style: none;
   font: 11px var(--mono);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--accent-green);
-  margin-bottom: 14px;
+  user-select: none;
+}
+.wiki-toc summary::-webkit-details-marker {
+  display: none;
+}
+.wiki-toc .toc-toggle-icon {
+  font-size: 12px;
+  transition: transform 0.2s ease;
+  display: inline-block;
+}
+.wiki-toc[open] .toc-toggle-icon {
+  transform: rotate(180deg);
+}
+.wiki-toc[open] .toc-list {
+  margin-top: 14px;
 }
 .toc-list {
   list-style: none;
@@ -1024,6 +1381,16 @@ h2 {
   font-family: var(--mono);
 }
 
+@media (max-width: 640px) {
+  .wiki-toc {
+    margin: 0 0 32px;
+    padding: 14px 16px;
+  }
+  .toc-link {
+    font-size: 13.5px;
+  }
+}
+
 /* 404 Page */
 .not-found-section {
   min-height: 60vh;
@@ -1033,7 +1400,7 @@ h2 {
   padding: 60px 0 100px;
 }
 .not-found-code {
-  font: 700 clamp(72px, 14vw, 150px) var(--mono);
+  font: 700 clamp(64px, 14vw, 150px) var(--mono);
   line-height: 0.9;
   letter-spacing: -0.06em;
   color: var(--ink);
@@ -1043,23 +1410,40 @@ h2 {
   color: var(--accent-green);
 }
 .not-found-title {
-  font-size: clamp(32px, 5vw, 56px);
+  font-size: clamp(28px, 5vw, 56px);
   margin: 0 0 20px;
   letter-spacing: -0.04em;
-  line-height: 1;
+  line-height: 1.05;
 }
 .not-found-text {
   color: var(--muted);
-  font-size: 17px;
+  font-size: 16px;
   max-width: 480px;
   line-height: 1.6;
   margin-bottom: 35px;
 }
 .not-found-actions {
   display: flex;
-  gap: 20px;
+  gap: 16px;
   flex-wrap: wrap;
   align-items: center;
+}
+
+@media (max-width: 640px) {
+  .not-found-section {
+    padding: 40px 0 70px;
+  }
+  .not-found-actions {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+  .not-found-actions .button,
+  .not-found-actions .search-trigger {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

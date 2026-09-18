@@ -36,6 +36,21 @@ Dynatrace’s Davis AI engine evaluates topological dependencies via Smartscape 
 
 Effective engineering teams clearly separate transient communication from durable institutional knowledge:
 
+```text
+  Incident Commander      Dynatrace (Davis AI)       Slack (#war-room)       ROSA / Argo CD        Jira / Confluence
+         |                          |                       |                      |                       |
+   (1)   |                          +--- Root Cause Alert ->|                      |                       |
+         |                          |    (HTTP 504 Spikes)  |                      |                       |
+   (2)   |--- Acknowledge Alert & Initiate Triage --------->|                      |                       |
+         |                          |                       |                      |                       |
+   (3)   |--- Immediate Mitigation (Pod Scale / Git Revert) ---------------------->|                       |
+         |                          |                       |                      |                       |
+   (4)   |                          +--- Telemetry Normal ->|                      |                       |
+         |                          |    (P95 Latency OK)   |                      |                       |
+   (5)   |--- Document Post-Mortem & Update Living Runbook ------------------------------------------------>|
+         |                          |                       |                      |                       |
+```
+
 | Tool           | Primary Function                                                          | Lifespan                  | Best Practices                                                                                                                              |
 | :------------- | :------------------------------------------------------------------------ | :------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Slack**      | Immediate triage and incident war-room coordination                       | Ephemeral (hours to days) | Designate an Incident Commander. Avoid splitting discussions across multiple channels. Post structured status rollups at regular intervals. |

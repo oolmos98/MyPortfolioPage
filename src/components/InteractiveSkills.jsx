@@ -52,14 +52,9 @@ export default function InteractiveSkills() {
           <span className="skill-label">{group.label}</span>
           <div className="skill-list">
             {group.skills.map((skill) => (
-              <motion.span
-                className="skill-pill"
-                key={skill}
-                whileHover={{ y: -4, backgroundColor: "#d8f45f" }}
-                transition={{ type: "spring", stiffness: 300, damping: 18 }}
-              >
+              <span className="skill-pill" key={skill}>
                 {skill}
-              </motion.span>
+              </span>
             ))}
           </div>
         </motion.div>

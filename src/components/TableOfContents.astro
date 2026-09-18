@@ -14,8 +14,13 @@ const h2s = (headings ?? []).filter((h: Heading) => h.depth === 2);
 ---
 
 {h2s.length >= 2 && (
-  <nav class="wiki-toc" aria-label="Table of contents">
-    <div class="toc-title">Table of contents</div>
+  <details class="wiki-toc" open>
+    <summary class="toc-title">
+      <span>Table of contents</span>
+      <span class="toc-toggle-icon" aria-hidden="true">
+        ▾
+      </span>
+    </summary>
     <ul class="toc-list">
       {h2s.map((h: Heading) => (
         <li>
@@ -25,7 +30,7 @@ const h2s = (headings ?? []).filter((h: Heading) => h.depth === 2);
         </li>
       ))}
     </ul>
-  </nav>
+  </details>
 )}
 
 <script>

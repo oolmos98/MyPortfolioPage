@@ -1,0 +1,184 @@
+---
+---
+
+<dialog class="search-dialog" id="search-modal" aria-label="Site Search">
+  <div class="search-panel">
+    <div class="search-header">
+      <span
+        aria-hidden="true"
+        style="font-family: var(--mono); color: var(--muted); font-size: 14px;"
+      >
+        ⌕
+      </span>
+      <input
+        type="search"
+        class="search-input"
+        id="search-input"
+        placeholder="Search notes, platform engineering, ROSA, AWS..."
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <button type="button" class="search-close-btn" id="search-close" aria-label="Close search">
+        ESC
+      </button>
+    </div>
+    <div class="search-results" id="search-results" role="region" aria-live="polite">
+      <div class="search-empty">Type a topic, technology, or question to search...</div>
+    </div>
+    <div class="search-footer">
+      <span>Navigate with ↑ ↓ · Open with ↵</span>
+      <span>Static Search</span>
+    </div>
+  </div>
+</dialog>
+
+<script>
+  let pagefindInstance: any = null;
+
+  async function loadPagefind() {
+    if (pagefindInstance) return pagefindInstance;
+    try {
+      // Dynamic import of pagefind generated index
+      const pagefindPath = "/pagefind/pagefind.js";
+      pagefindInstance = await import(/* @vite-ignore */ pagefindPath);
+      await pagefindInstance.init?.();
+      return pagefindInstance;
+    } catch (e) {
+      console.warn("Pagefind index not found. Run a build to generate search index.", e);
+      return null;
+    }
+  }
+
+  function initSearch() {
+    const dialog = document.getElementById("search-modal") as HTMLDialogElement | null;
+    const input = document.getElementById("search-input") as HTMLInputElement | null;
+    const resultsContainer = document.getElementById("search-results");
+    const closeBtn = document.getElementById("search-close");
+
+    if (!dialog || !input || !resultsContainer || !closeBtn) return;
+
+    let debounceTimer: any = null;
+
+    const openModal = async () => {
+      if (dialog.open) return;
+      dialog.showModal();
+      input.value = "";
+      resultsContainer.innerHTML =
+        '<div class="search-empty">Type a topic, technology, or question to search...</div>';
+      input.focus();
+      await loadPagefind();
+    };
+
+    const closeModal = () => {
+      if (!dialog.open) return;
+      dialog.close();
+    };
+
+    closeBtn.onclick = closeModal;
+
+    dialog.onclick = (e) => {
+      const rect = dialog.getBoundingClientRect();
+      const isInDialog =
+        rect.top <= e.clientY &&
+        e.clientY <= rect.top + rect.height &&
+        rect.left <= e.clientX &&
+        e.clientX <= rect.left + rect.width;
+      if (!isInDialog) {
+        closeModal();
+      }
+    };
+
+    // Attach to search trigger buttons
+    document.querySelectorAll(".search-trigger").forEach((trigger) => {
+      trigger.addEventListener("click", (e) => {
+        e.preventDefault();
+        openModal();
+      });
+    });
+
+    // Shortcut: Cmd + K or Ctrl + K
+    window.addEventListener("keydown", (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        if (dialog.open) {
+          closeModal();
+        } else {
+          openModal();
+        }
+      }
+    });
+
+    input.addEventListener("input", () => {
+      clearTimeout(debounceTimer);
+      const query = input.value.trim();
+
+      if (!query) {
+        resultsContainer.innerHTML =
+          '<div class="search-empty">Type a topic, technology, or question to search...</div>';
+        return;
+      }
+
+      debounceTimer = setTimeout(async () => {
+        const pf = await loadPagefind();
+        if (!pf) {
+          resultsContainer.innerHTML =
+            '<div class="search-empty">Search index will be generated during static build.</div>';
+          return;
+        }
+
+        resultsContainer.innerHTML = '<div class="search-empty">Searching...</div>';
+        const search = await pf.search(query);
+
+        if (!search.results || search.results.length === 0) {
+          resultsContainer.innerHTML = `<div class="search-empty">No results found for "${query}".</div>`;
+          return;
+        }
+
+        const dataPromises = search.results.slice(0, 7).map((r: any) => r.data());
+        const dataList = await Promise.all(dataPromises);
+
+        resultsContainer.innerHTML = "";
+        dataList.forEach((item: any) => {
+          const a = document.createElement("a");
+          a.className = "search-result-item";
+          a.href = item.url;
+          a.innerHTML = `
+            <span class="search-result-title">${item.meta?.title || "Note"}</span>
+            <span class="search-result-excerpt">${item.excerpt || ""}</span>
+          `;
+          a.addEventListener("click", () => {
+            closeModal();
+          });
+          resultsContainer.appendChild(a);
+        });
+      }, 150);
+    });
+
+    // Arrow navigation inside results
+    dialog.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        closeModal();
+        return;
+      }
+
+      const items = Array.from(dialog.querySelectorAll<HTMLElement>(".search-result-item"));
+      if (items.length === 0) return;
+
+      const activeElement = document.activeElement as HTMLElement;
+      const currentIndex = items.indexOf(activeElement);
+
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        const nextIndex = currentIndex < items.length - 1 ? currentIndex + 1 : 0;
+        items[nextIndex]?.focus();
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        const prevIndex = currentIndex > 0 ? currentIndex - 1 : items.length - 1;
+        items[prevIndex]?.focus();
+      }
+    });
+  }
+
+  document.addEventListener("astro:page-load", initSearch);
+  initSearch();
+</script>

@@ -2,6 +2,8 @@
 import { Image } from "astro:assets";
 import { ClientRouter } from "astro:transitions";
 import InteractiveSkills from "../components/InteractiveSkills.jsx";
+import BackToTop from "../components/BackToTop.astro";
+import SearchModal from "../components/SearchModal.astro";
 import portrait from "../assets/img/IMG_1666.jpg";
 import "../styles/global.css";
 
@@ -11,38 +13,68 @@ const projects = [
     title: "Secure services on the platform",
     text: "Spring Boot services designed around clear contracts, Entra ID authentication, and data workflows that stay understandable as systems grow.",
     tags: ["Java", "Spring Boot", "GraphQL", "Entra ID"],
+    href: "/wiki/spring-boot-rosa/",
   },
   {
     number: "02",
     title: "Delivery without the drama",
-    text: "GitLab CI, Snyk, Dynatrace, Kubernetes, and ROSA practices that make shipping repeatable, secure, observable, and less fragile.",
-    tags: ["ROSA", "GitLab CI", "Dynatrace"],
+    text: "GitLab CI, Snyk, Argo CD, Dynatrace, Kubernetes, and ROSA practices that make shipping repeatable, secure, observable, and less fragile.",
+    tags: ["ROSA", "Argo CD", "GitLab CI"],
+    href: "/wiki/secure-delivery/",
   },
 ];
+
+const canonicalUrl = new URL(
+  Astro.url.pathname,
+  Astro.site ?? "https://www.omarolmos.com",
+).toString();
+const ogImageUrl = new URL("/og-image.png", Astro.site ?? "https://www.omarolmos.com").toString();
+const pageDescription =
+  "The portfolio and engineering wiki of Omar Olmos, a software engineer focused on platform architecture, systems engineering, and operational reliability.";
 ---
 
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
-    <meta
-      name="description"
-      content="The portfolio and engineering wiki of Omar Olmos, a software engineer building secure AWS and ROSA platforms with Java and Spring Boot."
-    />
+    <meta name="description" content={pageDescription} />
+    <link rel="canonical" href={canonicalUrl} />
+
+    <!-- Open Graph / Facebook / LinkedIn -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Omar Olmos" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:title" content="Omar Olmos | Software Engineer" />
+    <meta property="og:description" content={pageDescription} />
+    <meta property="og:image" content={ogImageUrl} />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={canonicalUrl} />
+    <meta name="twitter:title" content="Omar Olmos | Software Engineer" />
+    <meta name="twitter:description" content={pageDescription} />
+    <meta name="twitter:image" content={ogImageUrl} />
+
     <ClientRouter />
     <link rel="icon" href="/favicon.svg" />
     <title>Omar Olmos | Software Engineer</title>
   </head>
-  <body>
+  <body id="top">
+    <a href="#main-content" class="skip-link">
+      Skip to main content
+    </a>
     <div class="page-noise" aria-hidden="true"></div>
     <header class="site-header">
-      <a class="wordmark" href="/">
+      <a class="wordmark" href="/" transition:name="site-wordmark">
         OO<span>.</span>
       </a>
       <nav aria-label="Main navigation">
         <a href="#work">Work</a>
         <a href="#capabilities">Capabilities</a>
         <a href="/wiki/">Wiki</a>
+        <button type="button" class="search-trigger" aria-label="Open search">
+          Search <span class="search-kbd">⌘K</span>
+        </button>
         <a
           class="nav-contact"
           href="https://www.linkedin.com/in/oolmos/"
@@ -54,7 +86,7 @@ const projects = [
       </nav>
     </header>
 
-    <main>
+    <main id="main-content">
       <section class="hero section-wrap" aria-labelledby="hero-title">
         <div class="hero-copy">
           <p class="eyebrow">Software engineer / California</p>
@@ -89,7 +121,8 @@ const projects = [
                 alt="Omar and his wife at the coast"
                 width={620}
                 height={760}
-                priority
+                loading="eager"
+                decoding="async"
               />
             </div>
             <figcaption>Left: my wife. Right: Omar.</figcaption>
@@ -110,9 +143,9 @@ const projects = [
         <div class="intro-details">
           <p>
             My current focus is Java and Spring Boot on AWS and Red Hat OpenShift Service on AWS
-            (ROSA), with Kubernetes deployment patterns, GitLab CI automation, Snyk security checks,
-            Microsoft Entra ID authentication, Amazon Aurora PostgreSQL, GraphQL, and Dynatrace
-            observability.
+            (ROSA), with Kubernetes deployment patterns, Argo CD GitOps delivery, GitLab CI
+            automation, Snyk security checks, Microsoft Entra ID authentication, Amazon Aurora
+            PostgreSQL, GraphQL, and Dynatrace observability.
           </p>
           <p>
             Good engineering should be clear to use, observable in production, and easy for the next
@@ -136,7 +169,7 @@ const projects = [
         </div>
         <div class="project-list">
           {projects.map((project) => (
-            <article class="project-row" data-reveal>
+            <a class="project-row" href={project.href} data-reveal>
               <span class="project-number">{project.number}</span>
               <div class="project-content">
                 <h3>{project.title}</h3>
@@ -150,7 +183,7 @@ const projects = [
               <span class="project-arrow" aria-hidden="true">
                 ↗
               </span>
-            </article>
+            </a>
           ))}
         </div>
       </section>
@@ -200,10 +233,13 @@ const projects = [
             <a href="https://github.com/oolmos98" target="_blank" rel="noreferrer">
               GitHub
             </a>
+            <a href="#top">Back to top ↑</a>
           </div>
         </div>
       </section>
     </main>
+    <SearchModal />
+    <BackToTop />
     <script>
       const revealOnScroll = () => {
         const items = document.querySelectorAll("[data-reveal]");

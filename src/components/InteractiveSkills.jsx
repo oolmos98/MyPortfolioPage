@@ -7,7 +7,7 @@ const skillGroups = [
   },
   {
     label: "Platform",
-    skills: ["AWS", "ROSA", "OpenShift", "Kubernetes", "DevOps"],
+    skills: ["AWS", "ROSA", "OpenShift", "Kubernetes", "Argo CD", "DevOps"],
   },
   {
     label: "Operate",
@@ -27,7 +27,6 @@ const skillGroups = [
       "SQL Server",
       "AWS S3",
       "Terraform",
-      "Argo CD",
       "Azure DevOps",
       "Bruno",
       "Insomnia",

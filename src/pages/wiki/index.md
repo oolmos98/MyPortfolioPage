@@ -10,8 +10,8 @@ description: Public notes on platform engineering, secure delivery, observabilit
 
 I am a Lead Software Engineer at State Farm. I work across Java and Spring
 Boot services, GraphQL APIs, Amazon Web Services (AWS), Red Hat OpenShift
-Service on AWS (ROSA), Kubernetes, secure delivery, and production
-observability.
+Service on AWS (ROSA), Kubernetes, Argo CD GitOps, secure delivery, and
+production observability.
 
 This wiki explains how I think about building and operating software. It also
 covers how I use Dynatrace, Slack, Jira, Confluence, Claude, and Codex in the
@@ -21,9 +21,9 @@ expose employer-specific architecture or confidential information.
 ## Start here
 
 - [Platform engineering](/wiki/platform-engineering/): How I structure AWS, ROSA, Kubernetes, and OpenShift responsibilities
-- [Secure delivery](/wiki/secure-delivery/): How GitLab CI and Snyk support safer releases
+- [Secure delivery](/wiki/secure-delivery/): How GitLab CI, Snyk, and Argo CD support safer releases
 - [Observability and collaboration](/wiki/observability-collaboration/): How Dynatrace and team tools connect signals to action
-- [Spring Boot on ROSA](/wiki/spring-boot-rosa/): How I think about running Java services on OpenShift
+- [Spring Boot on ROSA](/wiki/spring-boot-rosa/): How I think about running Java services on OpenShift with GitOps
 - [Earlier experience](/wiki/earlier-experience/): The application, cloud, and delivery technologies in my background
 - [AI-assisted engineering](/wiki/ai-assisted-engineering/): How I use Claude and Codex with engineering safeguards
 - [Working principles](/wiki/principles/): The standards I use to make technical decisions and lead work

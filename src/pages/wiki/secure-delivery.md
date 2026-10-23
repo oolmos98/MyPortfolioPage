@@ -1,32 +1,28 @@
 ---
 layout: ../../layouts/WikiLayout.astro
 title: Secure delivery
-description: GitLab CI, Snyk, Argo CD GitOps, identity, dependency hygiene, and release evidence.
+description: GitLab CI, Snyk, Argo CD GitOps, OIDC identity, and release verification.
 ---
 
 # Secure delivery
 
-Secure delivery integrates continuous verification and compliance directly into software delivery rather than treating security as an out-of-band audit gate. By combining GitLab CI, Snyk security scanning, Argo CD GitOps reconciliation on ROSA, short-lived workload identity, and cryptographically verified release evidence, teams can release rapidly while maintaining verifiable compliance.
+Security gates work best when they run automatically inside the normal delivery pipeline rather than as a manual spreadsheet review two days before launch. Using GitLab CI, Snyk, OIDC short-lived tokens, and Argo CD on ROSA lets us verify every commit without slowing down releases.
 
-For application runtime baselines and container hygiene, see [Spring Boot on ROSA](/wiki/spring-boot-rosa/).
+For how the containers themselves are configured on OpenShift, see [Spring Boot on ROSA](/wiki/spring-boot-rosa/).
 
-## A practical GitOps pipeline shape
+## Pull-based pipeline flow
 
 ```text
 validate -> test -> scan -> package & sign -> update gitops -> argo cd reconcile -> verify
 ```
 
-Every stage produces auditable artifacts. A pull-based GitOps pipeline provides critical engineering and security advantages:
+The biggest security win in this setup is **pull-based GitOps**: GitLab CI runners never hold OpenShift cluster-admin credentials or long-lived kubeconfigs. The pipeline’s job ends once it pushes a signed container image to the registry and commits the new SHA256 digest to the GitOps manifest repo. Argo CD inside the ROSA cluster pulls that commit and applies it.
 
-- CI runners require zero cluster administrator credentials; they only push container images to the registry and commit image digests to the GitOps configuration repository.
-- What source commit and dependencies were verified?
-- What security vulnerabilities were detected, and which were blocked?
-- Which exact image digest was built and signed?
-- How was deployment verified before traffic promotion?
+If a CI runner is ever compromised, it has no direct network or RBAC path to mutate running workloads in the cluster.
 
-## Automated scanning with GitLab CI, Snyk, and GitOps
+## GitLab CI + Snyk + GitOps promotion
 
-Below is an illustrative enterprise pipeline configuration demonstrating open-source dependency scanning, container vulnerability analysis, Cosign image signing, and GitOps promotion via Argo CD:
+Here is a stripped-down version of the pipeline pattern we use for Java services:
 
 ```yaml
 stages:
@@ -43,7 +39,7 @@ variables:
   IMAGE_NAME: "${DOCKER_REGISTRY}/platform/order-processing-service"
   GITOPS_REPO: "git@gitlab.example.com:platform/gitops-manifests.git"
 
-# Authenticate via OIDC to avoid long-lived cloud credentials
+# Authenticate via OIDC instead of storing static AWS IAM keys in CI variables
 .assume-role:
   id_tokens:
     AWS_JWT:
@@ -80,32 +76,27 @@ promote-to-test-gitops:
     - git config --global user.email "ci-bot@example.com"
     - git clone ${GITOPS_REPO} gitops-repo
     - cd gitops-repo/environments/test/services/order-processing-service
-    # Update image tag in Kustomize overlay to new immutable digest
+    # Pin Kustomize overlay to the exact immutable image tag/digest
     - kustomize edit set image ${IMAGE_NAME}=${IMAGE_NAME}:${CI_COMMIT_SHORT_SHA}
     - git commit -am "chore(release): promote order-processing-service to ${CI_COMMIT_SHORT_SHA}"
     - git push origin main
-    # Argo CD on ROSA automatically detects Git change and reconciles state
 
 verify-argo-sync:
   stage: verify
   image: argoproj/argocd:v2.11.0
   script:
-    # Wait for in-cluster Argo CD to report Synced & Healthy on ROSA
     - argocd app wait order-processing-service-test --health --timeout 180
 ```
 
-## Standardized security controls
+## Guardrails that actually matter
 
-- **Pull-based GitOps security**: By using Argo CD on ROSA, CI runners never hold Kubernetes cluster administrator credentials or kubeconfig tokens. CI simply commits desired manifests to Git, eliminating a major vector for cluster privilege escalation.
-- **Pin dependencies deliberately**: Constrain dependency versions and automate vulnerability alerting via dependabot or Renovate. Review major dependency updates with dedicated regression tests.
-- **Enforce least-privilege identity**: Eliminate static service account keys. Authenticate CI/CD workers using OpenID Connect (OIDC) federated directly into AWS IAM or Azure Entra ID.
-- **Centralize secret management**: Secrets must never be stored in Git or passed as generic plain-text CI variables. Mount credentials dynamically using AWS Secrets Manager or external secret operators integrated with Argo CD.
-- **Scan across layers**: Apply security gating across source code (SAST), third-party libraries (SCA), container base images, and infrastructure as code (IaC scanning for Terraform/Helm).
-- **Cryptographic image signing**: Sign container images post-build with Cosign. Configure admission controllers on ROSA to reject unsigned images.
+Rather than checking fifty compliance boxes that don't catch real bugs, I focus on five controls:
 
-## Auditable release evidence
-
-Transforming pipeline execution into an immutable audit trail requires structured release manifests. Every production release generates an evidence document captured in git or artifact storage:
+1. **No static cloud keys in CI**: Runners authenticate to AWS and Entra ID using short-lived OIDC JWT tokens scoped to the specific project and branch.
+2. **Fail builds on fixable vulnerabilities**: Snyk runs against both the Maven dependency tree (`snyk test`) and the built container image (`snyk container test`). If a critical vulnerability has an upstream fix available (`--fail-on=upgradable`), the pipeline stops before promotion.
+3. **Secrets stay out of Git and CI logs**: Application secrets live in AWS Secrets Manager and mount at runtime rather than sitting in repo variables or Kustomize files.
+4. **Immutable image digests**: Tagging images `:latest` makes rollbacks and audits impossible. Every deployment references a specific commit SHA and image digest, signed with Cosign.
+5. **Automated release receipts**: Each production promotion writes a small JSON receipt capturing the commit SHA, image digest, Cosign signature, Snyk scan summary, and Argo CD sync status so compliance audits don't require digging through old console logs.
 
 ```json
 {
@@ -130,19 +121,16 @@ Transforming pipeline execution into an immutable audit trail requires structure
     "sync_status": "Synced",
     "health_status": "Healthy"
   },
-  "deployment_target": "rosa-prod-us-east-1",
-  "approver": "lead-platform-engineer@example.com"
+  "deployment_target": "rosa-prod-us-east-1"
 }
 ```
 
-## Production readiness checklist
+## Five questions before merging to prod
 
-Before promoting code to production, verify:
+Before approving a production promotion, I make sure we can answer five basic questions:
 
-1. **What changed?** Has the commit log been summarized with clear functional tickets and architectural changes?
-2. **What could fail?** Have failure modes, database migration impacts, and downstream timeouts been evaluated?
-3. **How will we know?** Are Dynatrace service dashboards, synthetic tests, and alert notifications verified for the new release?
-4. **Who can roll it back?** Can on-call engineers roll back the release by reverting the GitOps commit in Git without cluster shell access?
-5. **What data is affected?** Are database schema changes backward-compatible with the previous revision?
-
-For core architectural standards that guide these release decisions, consult [Working principles](/wiki/principles/) and [Platform engineering](/wiki/platform-engineering/).
+1. **What changed?** Is the diff small enough to reason about, and tied to a clear ticket?
+2. **What breaks if the dependency is slow?** Are timeouts and circuit breakers configured if a downstream call hangs?
+3. **Are the database changes backward-compatible?** Can the old pod version and the new pod version run side-by-side during the rolling update (expand/contract pattern)?
+4. **How will we know it’s working?** Which Dynatrace dashboard or synthetic monitor will show if error rates spike?
+5. **Can on-call revert it in under two minutes?** Is rolling back just a `git revert` on the GitOps repo?

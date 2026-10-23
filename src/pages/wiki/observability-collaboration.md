@@ -1,40 +1,31 @@
 ---
 layout: ../../layouts/WikiLayout.astro
 title: Observability and collaboration
-description: Dynatrace, Slack, Jira, and Confluence workflows for reliable engineering teams.
+description: Dynatrace, Slack, Jira, and Confluence workflows for debugging production systems and running incidents.
 ---
 
 # Observability and collaboration
 
-High-reliability engineering requires two complementary signals: telemetry from the runtime system and coordination across the engineering team. Dynatrace provides real-time distributed visibility into software execution; Slack, Jira, and Confluence provide the collaboration framework to triage, remediate, and permanently address systemic issues.
+Dashboards are useless if they just look green until a customer reports an outage. Good observability tells you _what_ broke and _why_ within a couple of clicks; good team habits make sure the fix actually gets documented so the next person on call doesn’t have to rediscover it from scratch.
 
-For container health baselines and probe configuration, refer to [Spring Boot on ROSA](/wiki/spring-boot-rosa/).
+For container health probes and structured logging setup, see [Spring Boot on ROSA](/wiki/spring-boot-rosa/).
 
-## The Four Golden Signals in Dynatrace
+## What we watch in Dynatrace
 
-Observability dashboards must drive operational decisions rather than simply displaying raw graphs. We monitor services by mapping Dynatrace metrics directly to the SRE Four Golden Signals:
+Rather than building walls of twenty CPU graphs, I set up service dashboards around four practical signals:
 
-- **Latency**: Measure response times at the 95th and 99th percentiles (p95/p99) rather than misleading arithmetic averages. Dissect database query latency from external API response times using Dynatrace PurePath distributed tracing.
-- **Traffic**: Track inbound HTTP request throughput and Kafka consumer message rates to understand real-time customer demand and detect sudden traffic anomalies.
-- **Errors**: Quantify HTTP 5xx responses, unhandled JVM runtime exceptions, and circuit breaker trips. Isolate client-driven errors (4xx) from server-side infrastructure faults.
-- **Saturation**: Monitor container cgroup CPU throttling, JVM heap memory fragmentation, and database connection pool (HikariCP) utilization before degradation impacts end users.
+- **Tail latency (p95 / p99)**: Averages hide slow queries. Looking at p95 and p99 response times alongside Dynatrace PurePath distributed traces shows immediately whether latency is inside our JVM code, waiting on an Aurora query lock, or stuck on an external REST call.
+- **Traffic volume**: Request rate and message throughput tell us whether an error spike is caused by a traffic surge or a bad deployment.
+- **Error rates**: We separate client errors (`4xx`) from server faults (`5xx`, uncaught exceptions, tripped Resilience4j circuit breakers) so alerts only fire when our side is failing.
+- **Resource saturation**: Container CPU throttling, JVM heap pressure, and HikariCP connection pool utilization usually warn us minutes before requests start timing out.
 
-## Dynatrace and Davis AI root-cause analysis
+### Cutting down alert noise
 
-Dynatrace’s Davis AI engine evaluates topological dependencies via Smartscape mapping to eliminate alert noise during complex cascading failures:
+Alert fatigue kills on-call effectiveness. We tag every Argo CD rollout in Dynatrace via webhook markers so when an anomaly fires, we can immediately see if a deployment happened five minutes earlier. Every paging alert is required to link directly to the affected service dashboard and a Confluence runbook—if an alert doesn’t have a clear action attached to it, it shouldn’t page anyone.
 
-1. **Automated anomaly detection**: Davis dynamically baselines typical performance (evaluating seasonal trends and diurnal curves) to trigger alerts only on statistically significant deviations.
-2. **Topology-aware correlation**: When a downstream database experiences connection saturation, Davis correlates upstream API timeout spikes directly to the root cause rather than alerting on every downstream consumer individually.
-3. **Deployment event markers**: Automatically tag releases via CI/CD webhooks so teams can immediately determine whether an anomaly coincided with a specific code or configuration rollout.
-4. **Actionable alerts**: Every alert must include:
-   - Clear customer impact (e.g., "Checkout error rate elevated to 4.2%").
-   - Suspected root cause entity.
-   - Deep link directly to the relevant Dynatrace PurePath trace.
-   - Runbook link outlining immediate triage steps.
+## Incident flow: from alert to post-mortem
 
-## Cross-functional collaboration matrix
-
-Effective engineering teams clearly separate transient communication from durable institutional knowledge:
+When a production issue hits, we keep communication split by lifespan: Slack for real-time triage, Jira for follow-up engineering work, and Confluence for the permanent record.
 
 ```text
   Incident Commander      Dynatrace (Davis AI)       Slack (#war-room)       ROSA / Argo CD        Jira / Confluence
@@ -51,41 +42,29 @@ Effective engineering teams clearly separate transient communication from durabl
          |                          |                       |                      |                       |
 ```
 
-| Tool           | Primary Function                                                          | Lifespan                  | Best Practices                                                                                                                              |
-| :------------- | :------------------------------------------------------------------------ | :------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Slack**      | Immediate triage and incident war-room coordination                       | Ephemeral (hours to days) | Designate an Incident Commander. Avoid splitting discussions across multiple channels. Post structured status rollups at regular intervals. |
-| **Jira**       | Work tracking, remediation backlog, and platform tasks                    | Medium-term (sprints)     | Write tickets around measurable outcomes. Link every remediation task directly to the incident review ticket.                               |
-| **Confluence** | Durable runbooks, architectural decision records (ADRs), and post-mortems | Long-term (living docs)   | Include document owners and last-verified timestamps. Every production alert must link directly to an active Confluence runbook.            |
+- **Slack** is strictly for live coordination. One person takes the Incident Commander role so engineers debugging the issue aren’t interrupted every three minutes for status updates.
+- **Jira** captures the follow-up engineering tickets (like adding a missing index or tightening a timeout) so remediation work gets scheduled into the next sprint instead of forgotten once the fire is out.
+- **Confluence** holds the post-mortem and updated runbook so the next engineer who sees that alert knows what to check first.
 
-## Production incident handoff template
+## On-call handoff template
 
-During active production incidents, handoffs between on-call engineers must be concise, structured, and factual. Use this standardized markdown template in Slack:
+Long incidents occasionally cross shift boundaries. Dumping a 200-message Slack thread on the incoming engineer wastes time, so we post a short structured handoff before signing off:
 
 ```markdown
 ### Incident Handoff — [INC-4029: Order API 504 Gateway Timeouts]
 
-- **Current Status**: ACTIVE / MITIGATING
+- **Status**: MITIGATING
 - **Customer Impact**: ~3% of checkout requests failing with HTTP 504 in US-East.
-- **Root Cause Candidate**: Connection pool exhaustion on `aurora-pg-primary` following deployment `v2.4.1`.
-- **Mitigations Applied**:
-  - Rolled back deployment to `v2.4.0` at 14:15 UTC.
-  - Scale replica count increased from 3 to 6 pods to absorb traffic backlog.
-- **Next Actions**:
-  - Monitor Dynatrace p95 response time until it drops below 250ms threshold.
-  - Verify Aurora read-replica connection distribution.
-- **Current Incident Commander**: @omar.olmos -> Handing off to: @alex.dev
-- **Incident Links**:
-  - Slack Channel: `#inc-4029-order-api`
-  - Dynatrace Dashboard: `https://dynatrace.example.com/ui/apps/order-api`
-  - Jira Post-Mortem Ticket: `https://jira.example.com/browse/PLAT-8412`
+- **Suspected Cause**: Connection pool saturation on `aurora-pg-primary` after deploying `v2.4.1`.
+- **What We Did**:
+  - Reverted GitOps manifest to `v2.4.0` at 14:15 UTC.
+  - Bumped replica count from 3 to 6 pods while the backlog drains.
+- **What Needs Watching**:
+  - Confirm p95 latency stays below 250ms over the next 30 minutes.
+  - Check Aurora reader connection balance.
+- **Handoff**: @omar.olmos -> @alex.dev
+- **Links**:
+  - Slack: `#inc-4029-order-api`
+  - Dynatrace: `https://dynatrace.example.com/ui/apps/order-api`
+  - Jira: `PLAT-8412`
 ```
-
-## Post-incident review and learning
-
-The value of an incident lies in the architectural improvements it motivates:
-
-- **Blameless post-mortem**: Focus on systemic vulnerabilities, missing alerts, and unclear runbooks rather than individual human error.
-- **Prioritize preventative work**: Schedule corrective platform improvements into upcoming sprint cycles before resuming non-essential feature development.
-- **Refine operational documentation**: Update Confluence runbooks with newly discovered remediation techniques and failure signatures.
-
-For broader engineering principles regarding team culture and operational ownership, see [Working principles](/wiki/principles/).

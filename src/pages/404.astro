@@ -1,6 +1,7 @@
 ---
 import { ClientRouter } from "astro:transitions";
 import SearchModal from "../components/SearchModal.astro";
+import FlappyPodModal from "../components/FlappyPodModal.astro";
 import BackToTop from "../components/BackToTop.astro";
 import "../styles/global.css";
 ---
@@ -50,13 +51,22 @@ import "../styles/global.css";
         <a href="/wiki/" class="button" style="border: 1px solid var(--ink);">
           Browse Wiki <span aria-hidden="true">↗</span>
         </a>
+        <button
+          type="button"
+          class="button"
+          style="border: 1px solid var(--ink); background: transparent; cursor: pointer;"
+          data-open-flappy
+        >
+          Play Flappy Pod <span aria-hidden="true">▸</span>
+        </button>
         <button type="button" class="search-trigger" aria-label="Open search">
-          Search notes <span class="search-kbd">⌘K</span>
+          Search notes <span aria-hidden="true">⌘K</span>
         </button>
       </div>
     </main>
 
     <SearchModal />
+    <FlappyPodModal />
     <BackToTop />
   </body>
 </html>

@@ -1,28 +1,29 @@
 ---
 layout: ../../layouts/WikiLayout.astro
 title: Spring Boot on ROSA
-description: A practical service delivery model for Java Spring Boot on ROSA and OpenShift with Argo CD GitOps.
+description: Running Java Spring Boot services reliably on Red Hat OpenShift Service on AWS (ROSA) with Argo CD.
 ---
 
 # Spring Boot on ROSA
 
-Red Hat OpenShift Service on AWS (ROSA) provides a managed OpenShift platform; Spring Boot provides the application framework. Operating enterprise microservices reliably requires co-designing both layers: the JVM application must expose accurate runtime states, the platform must govern scheduling and networking, and declarative GitOps via Argo CD must synchronize state without manual intervention.
+Running Spring Boot on Red Hat OpenShift Service on AWS (ROSA) works well once the JVM and Kubernetes stop fighting each other. Most production issues I’ve debugged on OpenShift come down to three things: the JVM ignoring container memory limits, aggressive liveness probes killing slow-starting pods, or rolling updates dropping in-flight requests.
 
-For the underlying cluster architecture and operational boundaries, see [Platform engineering](/wiki/platform-engineering/).
+For the surrounding AWS and cluster setup, see [Platform engineering](/wiki/platform-engineering/).
 
-## Service runtime baseline
+## Runtime baseline
 
-- **Externalized configuration**: Decouple runtime config from container images via Spring Cloud Kubernetes or mounted OpenShift `ConfigMap` and `Secret` resources.
-- **Probe segregation**: Never tie Kubernetes `livenessProbe` directly to downstream database health. Use Spring Boot Actuator's health groups to isolate `/actuator/health/liveness` (JVM responsiveness) from `/actuator/health/readiness` (ability to accept user traffic).
-- **Explicit resource bounds**: Always define container CPU/memory requests and limits. Set JVM heap constraints using `-XX:InitialRAMPercentage` and `-XX:MaxRAMPercentage` (typically 70–75%) so the JVM respects cgroup limits and avoids Kubernetes OOMKills.
-- **Connection pool limits**: Size HikariCP connection pools deliberately based on database worker capacity rather than arbitrary thread counts.
-- **Structured JSON logging**: Emit single-line JSON logs with correlation IDs (`traceId`, `spanId`) mapped through SLF4J MDC to support OpenTelemetry and distributed tracing.
-- **Arbitrary UID compliance**: OpenShift runs containers under arbitrary assigned user IDs. Ensure container images do not require root privileges (`USER 1001`) and that write directories grant group ownership (`chmod -R g=u /workdir`).
-- **Versioned database migrations**: Decouple schema migration (Flyway/Liquibase) from pod startup in high-concurrency deployments to prevent simultaneous schema locks.
+When setting up a Spring Boot service for OpenShift, I stick to a few defaults:
 
-## ROSA probe and resource configuration
+- **Keep config out of the image**: Mount environment-specific settings via OpenShift `ConfigMap` and `Secret` resources so the exact same container digest promotes from test to prod.
+- **Never tie liveness to downstream dependencies**: If Aurora or an upstream API has a 10-second hiccup and your `/actuator/health/liveness` endpoint checks database connectivity, Kubernetes will restart all your pods at the worst possible moment. Liveness should only check if the JVM is wedged; readiness checks whether the pod can serve traffic.
+- **Size heap by percentage, not hardcoded `-Xmx`**: Use `-XX:InitialRAMPercentage` and `-XX:MaxRAMPercentage` (usually 70–75%) so the JVM scales with the container’s cgroup memory limit and leaves headroom for metaspace, threads, and native buffers.
+- **Run as an arbitrary non-root UID**: OpenShift assigns random high UIDs to containers by default. Build images with a non-root user (`USER 1001`) and group-writable working directories (`chmod -R g=u /workdir`).
+- **Emit single-line JSON logs with trace IDs**: Map `traceId` and `spanId` into SLF4J MDC so logs correlate directly with traces in Dynatrace.
+- **Decouple database migrations from pod startup**: When 10 replicas spin up simultaneously, having every pod race to run Flyway or Liquibase migrations on startup asks for lock contention. Run schema migrations as a pre-sync job or separate pipeline step.
 
-When deploying Spring Boot 3.x to ROSA, probe tuning prevents prematurely killing slow-starting JVMs while ensuring traffic is routed only to warm instances:
+## Deployment and probe configuration
+
+Spring Boot 3.x apps can take 20–60 seconds to initialize context under load. A dedicated `startupProbe` gives the JVM room to boot without forcing you to weaken the `livenessProbe` that catches real deadlocks later:
 
 ```yaml
 apiVersion: apps/v1
@@ -55,21 +56,21 @@ spec:
           env:
             - name: JAVA_TOOL_OPTIONS
               value: "-XX:InitialRAMPercentage=50.0 -XX:MaxRAMPercentage=75.0 -XX:+ExitOnOutOfMemoryError"
-          # startupProbe gives the JVM up to 150s to bootstrap without triggering liveness failures
+          # Give the JVM up to 150s to finish booting before liveness kicks in
           startupProbe:
             httpGet:
               path: /actuator/health/liveness
               port: 8081
             failureThreshold: 30
             periodSeconds: 5
-          # livenessProbe detects deadlocks; failures restart the container
+          # Restart the container only if the JVM itself is unresponsive
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
               port: 8081
             periodSeconds: 10
             failureThreshold: 3
-          # readinessProbe governs routing; failures remove pod from ROSA Service endpoints
+          # Pull the pod out of the Service load balancer when dependencies degrade
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
@@ -82,16 +83,11 @@ spec:
                 command: ["sh", "-c", "sleep 10"]
 ```
 
-> [!TIP]
-> Adding a `preStop` hook with a brief sleep (e.g. 10 seconds) allows the OpenShift ingress router to deregister the pod endpoint before the JVM begins graceful shutdown, preventing dropped requests during rolling releases.
+The `preStop` `sleep 10` hook matters on OpenShift: when a pod terminates, Kubernetes removes its IP from endpoints asynchronously while sending `SIGTERM` to the container at the same time. Sleeping briefly before Spring Boot starts its graceful shutdown (`server.shutdown=graceful`) lets the HAProxy ingress router stop sending new connections first.
 
-## Declarative GitOps deployment with Argo CD
+## Managing deployments with Argo CD
 
-Rather than executing imperative deploy scripts from CI runners, applications on ROSA are managed declaratively using **Argo CD** (Red Hat OpenShift GitOps). The desired state lives in a dedicated GitOps configuration repository, and the in-cluster Argo CD controller reconciles that state continuously.
-
-### Argo CD Application CRD
-
-Below is an enterprise Argo CD `Application` custom resource managing the Spring Boot service on ROSA with automated drift correction and pruning:
+We don’t deploy from CI runners with `oc` or `kubectl`. Instead, CI updates the Kustomize overlay in our GitOps repository and Argo CD reconciles the cluster:
 
 ```yaml
 apiVersion: argoproj.io/v1alpha1
@@ -126,49 +122,30 @@ spec:
         maxDuration: 3m
 ```
 
-### GitOps advantages on ROSA
+With `selfHeal: true` and Kustomize overlays (`base/` for shared manifests, `overlays/test` and `overlays/prod` for replica counts and limits), rollbacks don’t require a special pipeline job. You run `git revert` on the manifest commit and Argo CD syncs the previous image digest immediately.
 
-- **Zero configuration drift (`selfHeal: true`)**: If an operator manually edits a pod, environment variable, or route in the OpenShift web console, Argo CD detects the difference within seconds and reverts the cluster back to the version-controlled Git state.
-- **Auditable rollbacks via Git revert**: If a release causes degradation, rolling back does not require cluster access or complex rollback pipelines. Running `git revert <commit-sha>` on the GitOps repository immediately causes Argo CD to synchronize the prior verified container digest.
-- **Kustomize overlay structure**: Application base definitions (`base/`) define common Spring Boot manifests, while environment overlays (`overlays/test`, `overlays/prod`) customize replica counts, CPU/memory limits, and Actuator configurations without duplicating YAML.
+## Connection pools and downstream timeouts
 
-## Connection pool and resilience tuning
+### Right-sizing HikariCP
 
-In distributed architectures connecting to Amazon Aurora PostgreSQL, connection exhaustion and downstream latency spikes are primary causes of service degradation.
+A common mistake is setting `maximumPoolSize: 50` or `100` on every microservice pod. Multiply that by 12 pods across a few services and Aurora spends more time context-switching connections than running queries.
 
-### HikariCP connection pool sizing
+A good starting point from the HikariCP docs is:
 
-Avoid defaulting HikariCP to arbitrary high values. Over-allocating connections causes thread thrashing and overwhelms database IOPS. A reliable starting sizing rule:
+$$\text{Pool Size} = (\text{CPU Cores} \times 2) + \text{Effective Spindle / IO Count}$$
 
-$$\text{Pool Size} = (\text{CPU Cores} \times 2) + \text{Disk Spindle / IO Target}$$
+In practice, for a 2-vCPU pod talking to Aurora PostgreSQL, **10 to 15 connections per pod** is plenty—especially when paired with a fast `connectionTimeout` (around 3 seconds) so requests fail fast instead of queuing until threads exhaust.
 
-For a container allocated 2 CPUs, a pool of 10–15 connections per pod is typically sufficient when paired with proper read/write connection splitting.
+### Timeouts and Resilience4j
 
-### Circuit breaking and timeouts
+Every outbound `RestClient` or `WebClient` call needs explicit connect (1–2s) and read (3–5s) timeouts. Where we use Resilience4j circuit breakers or retries, we always pair retries with full jitter so a brief network blip doesn’t turn into a synchronized retry storm against a recovering service.
 
-Downstream REST or gRPC calls should be wrapped with Resilience4j circuit breakers:
+## Common failure modes on OpenShift
 
-- **Tight socket timeouts**: Set connect timeouts (1–2s) and read timeouts (3–5s) on downstream HTTP clients (`RestClient` / `WebClient`).
-- **Circuit breaker trip thresholds**: Open the circuit if error rates exceed 50% over a 20-call sliding window.
-- **Degraded fallbacks**: Provide cached or default fallbacks where business logic permits, avoiding unbounded retries.
-- **Exponential backoff with jitter**: If retries are necessary, apply full randomized jitter to prevent the "thundering herd" problem against struggling downstream services.
-
-## Deployment baseline
-
-1. **Build one immutable artifact**: Compile once in CI, package into an OCI container image, and sign/scan the image.
-2. **Promote via GitOps**: Update the target image digest in the environment's GitOps Kustomize overlay. Argo CD automatically synchronizes the new revision into ROSA.
-3. **Validate schema compatibility**: Ensure database schema changes follow the _expand/contract_ pattern so both previous and new application versions function simultaneously during rolling deployments.
-4. **Automated smoke verification**: Execute synthetic probes immediately post-rollout before terminating previous replica sets.
-5. **Reversible release plans**: Every release manifest must include a verified rollback procedure (Git revert) and database rollback compatibility notes. See [Secure delivery](/wiki/secure-delivery/) for release evidence requirements.
-
-## Failure modes and mitigation playbook
-
-| Failure Mode                                  | Root Cause                                                                    | Engineering Mitigation                                                                                                          |
-| :-------------------------------------------- | :---------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------ |
-| **Pod restart loop on startup**               | Heavy Spring context initialization exceeds default liveness timeout.         | Implement a dedicated `startupProbe` with high `failureThreshold` (e.g., 30 checks every 5s).                                   |
-| **Cascading database exhaustion**             | Database latency increases; incoming requests block all HikariCP connections. | Separate read/write datasources, enforce pool timeouts (e.g., `connectionTimeout: 3000`), and isolate readiness from DB health. |
-| **Dropped connections during rolling update** | Pod receives SIGTERM while ingress still directs active traffic.              | Configure Spring Boot graceful shutdown (`server.shutdown=graceful`) and add a `preStop` hook sleep.                            |
-| **Silent configuration drift**                | Manual changes in ROSA web console or CLI bypass version control.             | Enforce Argo CD `selfHeal: true` and RBAC restrictions preventing direct in-cluster edits.                                      |
-| **Downstream retry storms**                   | Transient network hiccups cause aggressive client retries that amplify load.  | Enforce exponential backoff with full jitter and circuit breakers across all HTTP/gRPC clients.                                 |
-
-For real-time incident diagnosis and telemetry monitoring of these failure modes, consult [Observability and collaboration](/wiki/observability-collaboration/).
+| Symptom                                       | What Usually Caused It                                                      | Fix                                                                                           |
+| :-------------------------------------------- | :-------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------- |
+| **Pod crash-loops during rollout**            | Spring context initialization takes longer than the liveness probe timeout. | Add a `startupProbe` (e.g., `failureThreshold: 30`, `periodSeconds: 5`).                      |
+| **All pods restart when the DB slows down**   | Database health indicator is included in `/actuator/health/liveness`.       | Keep DB checks in `readiness` only; restrict `liveness` to `ping` / internal JVM state.       |
+| **502 / 504 errors during rolling deploys**   | Pod stops accepting connections before HAProxy updates its endpoint list.   | Enable `server.shutdown=graceful` in Spring Boot and add a 10s `preStop` sleep hook.          |
+| **OOMKilled (Exit Code 137) under load**      | JVM heap + non-heap native memory exceeds the container memory limit.       | Lower `-XX:MaxRAMPercentage` to `70.0` or increase the pod's `resources.limits.memory`.       |
+| **Config changes disappear after a few mins** | Someone edited the Deployment directly in the OpenShift console.            | Expected behavior with Argo CD `selfHeal: true`—commit the change to the GitOps repo instead. |

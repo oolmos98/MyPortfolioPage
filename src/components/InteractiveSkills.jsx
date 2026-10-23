@@ -1,38 +1,31 @@
-import { motion } from "framer-motion";
-
 const skillGroups = [
   {
-    label: "Build",
-    skills: ["Java", "Spring Boot", "React", "GraphQL", "REST APIs"],
+    label: "Services & Data",
+    skills: ["Java", "Spring Boot", "GraphQL", "REST APIs", "Aurora PostgreSQL", "React"],
   },
   {
-    label: "Platform",
-    skills: ["AWS", "ROSA", "OpenShift", "Kubernetes", "Argo CD", "DevOps"],
+    label: "Platform & Runtime",
+    skills: ["AWS", "ROSA (OpenShift)", "Kubernetes", "Argo CD", "Terraform"],
   },
   {
-    label: "Operate",
-    skills: ["GitLab CI", "Snyk", "Dynatrace", "Entra ID"],
+    label: "Delivery & Security",
+    skills: ["GitLab CI", "Snyk", "Entra ID / OIDC", "Container Signing"],
   },
   {
-    label: "Collaborate",
-    skills: ["Slack", "Jira", "Confluence"],
+    label: "Observability & Ops",
+    skills: ["Dynatrace", "OpenTelemetry", "Slack", "Jira", "Confluence"],
   },
   {
-    label: "Earlier experience",
+    label: "Earlier Stack",
     skills: [
-      "Java JSP",
+      "SQL Server",
       "Flutter",
       "SwiftUI",
       "WeChat Mini Programs",
-      "SQL Server",
-      "AWS S3",
-      "Terraform",
+      "Java JSP",
       "Azure DevOps",
-      "Bruno",
-      "Insomnia",
-      "Draw.io",
-      "GitHub",
-      "GitLab",
+      "AWS S3",
+      "Bruno / Insomnia",
     ],
   },
 ];
@@ -40,15 +33,8 @@ const skillGroups = [
 export default function InteractiveSkills() {
   return (
     <div className="skill-groups" aria-label="Technical skills">
-      {skillGroups.map((group, groupIndex) => (
-        <motion.div
-          className="skill-group"
-          key={group.label}
-          initial={{ opacity: 0, y: 18 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.35 }}
-          transition={{ delay: groupIndex * 0.08, duration: 0.5 }}
-        >
+      {skillGroups.map((group) => (
+        <div className="skill-group" key={group.label}>
           <span className="skill-label">{group.label}</span>
           <div className="skill-list">
             {group.skills.map((skill) => (
@@ -57,7 +43,7 @@ export default function InteractiveSkills() {
               </span>
             ))}
           </div>
-        </motion.div>
+        </div>
       ))}
     </div>
   );

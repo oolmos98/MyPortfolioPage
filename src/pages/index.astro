@@ -4,23 +4,38 @@ import { ClientRouter } from "astro:transitions";
 import InteractiveSkills from "../components/InteractiveSkills.jsx";
 import BackToTop from "../components/BackToTop.astro";
 import SearchModal from "../components/SearchModal.astro";
+import FlappyPodModal from "../components/FlappyPodModal.astro";
 import portrait from "../assets/img/IMG_1666.jpg";
 import "../styles/global.css";
 
 const projects = [
   {
     number: "01",
-    title: "Secure services on the platform",
-    text: "Spring Boot services designed around clear contracts, Entra ID authentication, and data workflows that stay understandable as systems grow.",
-    tags: ["Java", "Spring Boot", "GraphQL", "Entra ID"],
+    title: "Spring Boot on ROSA",
+    text: "How I configure JVM memory bounds, separate liveness and readiness probes, size HikariCP pools, and handle zero-downtime rolling updates on OpenShift.",
+    tags: ["Java", "Spring Boot", "ROSA", "Argo CD"],
     href: "/wiki/spring-boot-rosa/",
   },
   {
     number: "02",
-    title: "Delivery without the drama",
-    text: "GitLab CI, Snyk, Argo CD, Dynatrace, Kubernetes, and ROSA practices that make shipping repeatable, secure, observable, and less fragile.",
-    tags: ["ROSA", "Argo CD", "GitLab CI"],
+    title: "Platform engineering & GitOps",
+    text: "Structuring multi-AZ AWS foundations, ROSA compute pools, Argo CD drift reconciliation, and clear boundaries between platform and application teams.",
+    tags: ["AWS", "Kubernetes", "OpenShift", "Aurora PostgreSQL"],
+    href: "/wiki/platform-engineering/",
+  },
+  {
+    number: "03",
+    title: "Pull-based CI/CD & release security",
+    text: "Running GitLab CI, Snyk scanning, and OIDC federation so pipelines commit signed image digests to Git instead of holding cluster admin credentials.",
+    tags: ["GitLab CI", "Snyk", "OIDC", "GitOps"],
     href: "/wiki/secure-delivery/",
+  },
+  {
+    number: "04",
+    title: "Observability & incident handoffs",
+    text: "Connecting Dynatrace distributed traces to Slack triage, Jira follow-ups, and Confluence runbooks when things break in production.",
+    tags: ["Dynatrace", "SRE", "Slack", "Confluence"],
+    href: "/wiki/observability-collaboration/",
   },
 ];
 
@@ -30,7 +45,7 @@ const canonicalUrl = new URL(
 ).toString();
 const ogImageUrl = new URL("/og-image.png", Astro.site ?? "https://www.omarolmos.com").toString();
 const pageDescription =
-  "The portfolio and engineering wiki of Omar Olmos, a software engineer focused on platform architecture, systems engineering, and operational reliability.";
+  "Omar Olmos — Lead Software Engineer working on Java, Spring Boot, AWS, ROSA/OpenShift, Argo CD GitOps, and production reliability.";
 ---
 
 <html lang="en">
@@ -44,20 +59,20 @@ const pageDescription =
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Omar Olmos" />
     <meta property="og:url" content={canonicalUrl} />
-    <meta property="og:title" content="Omar Olmos | Software Engineer" />
+    <meta property="og:title" content="Omar Olmos | Lead Software Engineer" />
     <meta property="og:description" content={pageDescription} />
     <meta property="og:image" content={ogImageUrl} />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:url" content={canonicalUrl} />
-    <meta name="twitter:title" content="Omar Olmos | Software Engineer" />
+    <meta name="twitter:title" content="Omar Olmos | Lead Software Engineer" />
     <meta name="twitter:description" content={pageDescription} />
     <meta name="twitter:image" content={ogImageUrl} />
 
     <ClientRouter />
     <link rel="icon" href="/favicon.svg" />
-    <title>Omar Olmos | Software Engineer</title>
+    <title>Omar Olmos | Lead Software Engineer</title>
   </head>
   <body id="top">
     <a href="#main-content" class="skip-link">
@@ -69,8 +84,8 @@ const pageDescription =
         OO<span>.</span>
       </a>
       <nav aria-label="Main navigation">
-        <a href="#work">Work</a>
-        <a href="#capabilities">Capabilities</a>
+        <a href="#work">Notes</a>
+        <a href="#capabilities">Stack</a>
         <a href="/wiki/">Wiki</a>
         <button type="button" class="search-trigger" aria-label="Open search">
           Search <span class="search-kbd">⌘K</span>
@@ -81,7 +96,7 @@ const pageDescription =
           target="_blank"
           rel="noreferrer"
         >
-          Let's connect <span aria-hidden="true">↗</span>
+          LinkedIn <span aria-hidden="true">↗</span>
         </a>
       </nav>
     </header>
@@ -89,19 +104,16 @@ const pageDescription =
     <main id="main-content">
       <section class="hero section-wrap" aria-labelledby="hero-title">
         <div class="hero-copy">
-          <p class="eyebrow">Software engineer / California</p>
-          <h1 id="hero-title">
-            Reliable platforms,
-            <br />
-            <em>thoughtfully built.</em>
-          </h1>
+          <p class="eyebrow">Omar Olmos · Lead Software Engineer · California</p>
+          <h1 id="hero-title">Backend services, OpenShift platforms, and production delivery.</h1>
           <p class="hero-summary">
-            I build software across Java services, cloud platforms, secure delivery, and the
-            operational practices that keep systems dependable in production.
+            I’m a Lead Software Engineer at State Farm. Most of my day-to-day work lives at the
+            intersection of Java and Spring Boot applications, AWS and ROSA (OpenShift) clusters,
+            Argo CD GitOps pipelines, and production observability.
           </p>
           <div class="hero-actions">
-            <a class="button button-primary" href="#work">
-              See selected work <span aria-hidden="true">↓</span>
+            <a class="button button-primary" href="/wiki/">
+              Read the engineering wiki <span aria-hidden="true">→</span>
             </a>
             <a
               class="text-link"
@@ -125,51 +137,45 @@ const pageDescription =
                 decoding="async"
               />
             </div>
-            <figcaption>Left: my wife. Right: Omar.</figcaption>
+            <figcaption>Left: my wife. Right: me.</figcaption>
           </figure>
-        </div>
-        <div class="hero-index" aria-hidden="true">
-          01 / 04
         </div>
       </section>
 
-      <section class="intro-band section-wrap" aria-label="Introduction" data-reveal>
-        <p class="section-kicker">A little context</p>
+      <section class="intro-band section-wrap" aria-label="Background">
+        <p class="section-kicker">Background</p>
         <div class="intro-statement">
-          I connect <span>application engineering</span>, platform reliability, security, and
-          practical AI-assisted delivery so teams can move from an idea to a dependable production
-          system.
+          Writing the service code is only half the job. The rest is making sure it deploys cleanly,
+          survives bad traffic, and doesn’t wake people up at 2 a.m.
         </div>
         <div class="intro-details">
           <p>
-            My current focus is Java and Spring Boot on AWS and Red Hat OpenShift Service on AWS
-            (ROSA), with Kubernetes deployment patterns, Argo CD GitOps delivery, GitLab CI
-            automation, Snyk security checks, Microsoft Entra ID authentication, Amazon Aurora
-            PostgreSQL, GraphQL, and Dynatrace observability.
+            Over the years I’ve worked across mobile apps, relational databases, legacy Java stacks,
+            and cloud infrastructure. Right now I focus on Spring Boot and GraphQL services running
+            on Red Hat OpenShift Service on AWS (ROSA), backed by Aurora PostgreSQL and Entra ID.
           </p>
           <p>
-            Good engineering should be clear to use, observable in production, and easy for the next
-            team to change. I use Slack, Jira, and Confluence to keep communication, decisions, and
-            delivery visible.
+            Instead of a traditional blog, I keep a working <a href="/wiki/">engineering wiki</a> on
+            this site. It documents how I set up GitOps pipelines, tune Kubernetes probes, trace
+            production issues in Dynatrace, and use tools like Claude and Codex without leaving a
+            mess for the next engineer on call.
           </p>
         </div>
       </section>
 
-      <section class="work-section section-wrap" id="work" aria-labelledby="work-title" data-reveal>
+      <section class="work-section section-wrap" id="work" aria-labelledby="work-title">
         <div class="section-heading">
           <div>
-            <p class="section-kicker">What I do</p>
-            <h2 id="work-title">
-              Systems people
-              <br />
-              <em>can rely on.</em>
-            </h2>
+            <p class="section-kicker">Field notes</p>
+            <h2 id="work-title">Architecture &amp; operations</h2>
           </div>
-          <span class="section-count">02 / 04</span>
+          <a class="text-link" href="/wiki/">
+            All 7 notes →
+          </a>
         </div>
         <div class="project-list">
           {projects.map((project) => (
-            <a class="project-row" href={project.href} data-reveal>
+            <a class="project-row" href={project.href}>
               <span class="project-number">{project.number}</span>
               <div class="project-content">
                 <h3>{project.title}</h3>
@@ -181,7 +187,7 @@ const pageDescription =
                 </div>
               </div>
               <span class="project-arrow" aria-hidden="true">
-                ↗
+                →
               </span>
             </a>
           ))}
@@ -192,79 +198,51 @@ const pageDescription =
         class="capabilities-section section-wrap"
         id="capabilities"
         aria-labelledby="capabilities-title"
-        data-reveal
       >
         <div class="section-heading">
           <div>
-            <p class="section-kicker">Technical capabilities</p>
-            <h2 id="capabilities-title">
-              From code
-              <br />
-              <em>to production.</em>
-            </h2>
+            <p class="section-kicker">Stack &amp; tooling</p>
+            <h2 id="capabilities-title">What I work with</h2>
           </div>
-          <span class="section-count">03 / 04</span>
         </div>
-        <InteractiveSkills client:visible />
+        <InteractiveSkills />
       </section>
 
-      <section class="contact-section section-wrap" aria-labelledby="contact-title" data-reveal>
-        <p class="section-kicker">Start a conversation</p>
-        <h2 id="contact-title">
-          Let's build
-          <br />
-          <em>something dependable.</em>
-        </h2>
-        <span class="section-count contact-count">04 / 04</span>
+      <section class="contact-section section-wrap" aria-labelledby="contact-title">
+        <p class="section-kicker">Contact</p>
+        <h2 id="contact-title">Get in touch</h2>
+        <p class="contact-lead">
+          Always happy to talk shop about platform engineering, OpenShift/Kubernetes operations, or
+          backend architecture.
+        </p>
         <a
           class="contact-email"
           href="https://www.linkedin.com/in/oolmos/"
           target="_blank"
           rel="noreferrer"
         >
-          Connect on LinkedIn <span aria-hidden="true">↗</span>
+          linkedin.com/in/oolmos <span aria-hidden="true">↗</span>
         </a>
         <div class="contact-footer">
-          <span>Omar Olmos / 2026</span>
+          <span>Omar Olmos · 2026</span>
           <div>
+            <button type="button" class="flappy-trigger" data-open-flappy>
+              [Flappy Pod]
+            </button>
+            <a href="/wiki/">Wiki</a>
             <a href="https://www.linkedin.com/in/oolmos/" target="_blank" rel="noreferrer">
               LinkedIn
             </a>
             <a href="https://github.com/oolmos98" target="_blank" rel="noreferrer">
               GitHub
             </a>
-            <a href="#top">Back to top ↑</a>
+            <a href="#top">Top ↑</a>
           </div>
         </div>
       </section>
     </main>
     <SearchModal />
+    <FlappyPodModal />
     <BackToTop />
-    <script>
-      const revealOnScroll = () => {
-        const items = document.querySelectorAll("[data-reveal]");
-        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-          items.forEach((item) => item.classList.add("is-visible"));
-          return;
-        }
-
-        const observer = new IntersectionObserver(
-          (entries) => {
-            entries.forEach((entry) => {
-              if (entry.isIntersecting) {
-                entry.target.classList.add("is-visible");
-                observer.unobserve(entry.target);
-              }
-            });
-          },
-          { threshold: 0.12 },
-        );
-
-        items.forEach((item) => observer.observe(item));
-      };
-
-      document.addEventListener("astro:page-load", revealOnScroll);
-      revealOnScroll();
-    </script>
   </body>
 </html>

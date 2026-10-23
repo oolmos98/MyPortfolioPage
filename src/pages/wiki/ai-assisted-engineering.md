@@ -1,74 +1,66 @@
 ---
 layout: ../../layouts/WikiLayout.astro
 title: AI-assisted engineering
-description: Practical Claude and Codex workflows for software engineering.
+description: How I use Claude and Codex on production codebases without introducing regressions.
 ---
 
 # AI-assisted engineering
 
-AI coding assistants such as Anthropic Claude and OpenAI Codex are powerful levers for software engineering productivity, but they must amplify human judgment rather than replace it. In production systems, senior engineering leadership requires establishing clear task boundaries, providing targeted repository context, and demanding rigorous executable verification.
+I use **Claude** and **Codex** daily for backend and platform work—writing boilerplate tests, drafting Kustomize overlays, translating SQL migrations, and exploring unfamiliar call stacks.
 
-For foundational standards regarding interface design and review rigor, see [Working principles](/wiki/principles/).
+Used carelessly, though, LLMs generate plausible-looking code that hides subtle concurrency bugs, swallows exceptions, or pulls in outdated libraries. The workflow that works for me treats the model like a fast pair programmer operating under strict constraints, never as an autopilot.
 
-## The bounded engineering loop
+## How I run AI-assisted tasks
 
-Unconstrained generation produces subtle architectural drift and hallucinated APIs. A reliable AI-assisted engineering workflow follows an iterative, closed-loop cycle:
+Instead of asking a model to _"build feature X"_ across twenty files at once, I keep the loop tight:
 
-1. **Scope and bound**: Define the exact problem, affected components, and strict non-negotiable constraints (e.g., "Do not introduce third-party libraries; retain existing public method signatures").
-2. **Curate context**: Provide only the necessary interface definitions, schema contracts, and existing test suites. Avoid dumping entire codebases into prompts.
-3. **Hypothesis generation**: Request the minimal viable implementation or test harness to validate the proposed design.
-4. **Adversarial code review**: Inspect generated diffs with the same skepticism applied to untrusted external contributions.
-5. **Deterministic verification**: Execute unit tests, static type checks, security linters, and integration builds locally before creating pull requests.
-6. **Capture institutional learnings**: Document unexpected findings and update architectural documentation in Confluence.
+1. **Pin down the boundary first**: Before opening a prompt, I decide where the change belongs and what is off-limits (for example: _"Use our existing Spring Data Redis client; do not add new Maven dependencies or change the public controller signature"_).
+2. **Pass only the relevant context**: Dumping an entire repo into context usually degrades output quality. I feed the specific interface, the data model, and an existing test file so the model matches our conventions.
+3. **Review the diff like an untrusted PR**: I read every line before running it—checking specifically for swallowed exceptions, missing timeouts, thread-safety issues, and hallucinated config properties.
+4. **Verify with deterministic tools**: The code doesn't count until `./mvnw test`, static analysis, and local container builds pass cleanly.
 
-## Bounded task prompt template
+## Example: scoping a task prompt
 
-When prompting AI assistants for refactoring or feature implementation, use structured prompts that enforce precise constraints and executable verification:
+Vague prompts produce vague code. When I want help implementing a concrete component—like an idempotency filter—I structure the context and constraints explicitly:
 
 ```markdown
-### Task: Implement Idempotency Interceptor for Order Processing
+### Task: Implement Idempotency Filter for Order POST Requests
 
-- **Context**: Spring Boot 3.3.x service interacting with Amazon Aurora PostgreSQL.
-- **Relevant Files**:
+- **Stack**: Java 21, Spring Boot 3.3, Redis.
+- **Files in scope**:
   - `src/main/java/com/example/platform/order/OrderController.java`
   - `src/main/java/com/example/platform/idempotency/IdempotencyFilter.java`
-- **Objective**:
-  Implement a Redis/PostgreSQL-backed idempotency key check on incoming POST requests containing header `X-Idempotency-Key`.
-- **Constraints**:
-  1. Do NOT add new third-party Maven dependencies; utilize existing Spring Data Redis client.
-  2. Maintain thread-safety under concurrent duplicate requests (use distributed locking or atomic inserts).
-  3. If key exists with status 'COMPLETED', return cached HTTP response body and status code.
-  4. If key exists with status 'PENDING', return HTTP 409 Conflict.
-- **Verification Command**:
+- **Behavior**:
+  Check incoming POST requests for header `X-Idempotency-Key`.
+  1. Do NOT add new Maven dependencies; use existing `StringRedisTemplate`.
+  2. Use atomic `SET NX EX` so concurrent duplicate requests don't race.
+  3. If key status is `COMPLETED`, return the cached status and body.
+  4. If key status is `IN_PROGRESS`, return HTTP 409 Conflict.
+- **Verify with**:
   `./mvnw test -Dtest=IdempotencyFilterIntegrationTest`
 ```
 
-## Pull request review checklist for AI-generated code
+## What I check when reviewing AI-assisted PRs
 
-Before approving or merging code authored or assisted by AI models, verify every item:
+When reviewing pull requests (including my own) where AI tools did heavy lifting, I look out for five common failure modes:
 
-| Verification Category       | Risk Factor                                                   | Verification Checklist                                                                                                       |
-| :-------------------------- | :------------------------------------------------------------ | :--------------------------------------------------------------------------------------------------------------------------- |
-| **Dependency Hygiene**      | Hallucinated or malicious packages (typosquatting).           | Verify every library import against approved internal Maven/NPM registries. Ensure no untrusted packages were added.         |
-| **Security & Privacy**      | Accidental credential leakage or insecure defaults.           | Ensure zero hardcoded keys, passwords, or internal URLs. Confirm input sanitization and parameterized SQL queries.           |
-| **Concurrency & Resources** | Silent resource leaks and thread deadlocks.                   | Check that all file streams, HTTP connections, and database sessions use `try-with-resources`. Confirm proper thread-safety. |
-| **Failure Boundaries**      | Optimistic happy-path generation ignoring network partitions. | Ensure timeout handling, circuit breakers, and explicit fallback catches are implemented.                                    |
-| **API Contract Stability**  | Subtle alterations to JSON schema or HTTP status codes.       | Confirm serialized field names, date formats (ISO 8601), and error response bodies match existing public contracts.          |
+- **Invented or bloated dependencies**: Did the model pull in a new library for something the standard JDK or Spring already handles?
+- **Happy-path bias**: AI-generated code almost always assumes the network is fast and the database is up. I check that HTTP calls have explicit timeouts, database calls are bounded, and errors log useful context.
+- **Resource leaks**: Are input streams, HTTP responses, and database connections closed properly in `try-with-resources` blocks?
+- **Subtle contract drift**: Did a refactored DTO accidentally rename a JSON field or change how null values and timestamps serialize?
+- **Data boundary safety**: Never paste internal credentials, customer PII, or proprietary security topology into external cloud models.
 
-## High-leverage workflows vs anti-patterns
+## Where AI helps most vs. where it hurts
 
-```text
-High-Leverage Workflows:
-- Generating exhaustive boundary condition test cases (e.g., negative numbers, empty arrays, null fields)
-- Explaining unfamiliar legacy call stacks and proposing initial refactoring abstractions
-- Converting manual SQL schema changes into versioned Flyway/Liquibase migration scripts
-- Drafting initial API documentation, OpenAPI specs, and incident runbooks from source code
+**Where it saves real time:**
 
-Anti-Patterns:
-- Trusting generated regular expressions or cryptography without independent fuzz testing
-- Blindly copying AI code to resolve production outages without understanding underlying root causes
-- Feeding proprietary enterprise secrets, production tokens, or sensitive customer PII to cloud LLMs
-- Accepting complex autonomous architectural rewrites that bypass team review
-```
+- Writing parameterized edge-case unit tests (null inputs, boundary dates, malformed payloads).
+- Turning a rough schema change into a clean Flyway migration + rollback script.
+- Tracing an unfamiliar legacy class hierarchy to find where a config value is actually read.
+- Drafting initial runbook templates and incident timelines.
 
-For guidelines on integrating security scanning and automated gates into your delivery pipelines, explore [Secure delivery](/wiki/secure-delivery/).
+**Where it causes trouble:**
+
+- Copy-pasting a generated fix during a live outage without understanding the root cause.
+- Accepting a 1,500-line multi-file refactor that nobody on the team can explain during code review.
+- Trusting generated regular expressions, IAM policies, or auth logic without writing adversarial tests against them.

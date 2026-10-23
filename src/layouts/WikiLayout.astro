@@ -3,6 +3,7 @@ import { ClientRouter } from "astro:transitions";
 import BackToTop from "../components/BackToTop.astro";
 import TableOfContents from "../components/TableOfContents.astro";
 import SearchModal from "../components/SearchModal.astro";
+import FlappyPodModal from "../components/FlappyPodModal.astro";
 import "../styles/global.css";
 
 const { title, description } = Astro.props.frontmatter ?? Astro.props;
@@ -102,7 +103,7 @@ const ogImageUrl = new URL("/og-image.png", Astro.site ?? "https://www.omarolmos
       </a>
       <nav aria-label="Main navigation">
         <a href="/wiki/">Wiki</a>
-        <a href="/#work">Work</a>
+        <a href="/#work">Notes</a>
         <button type="button" class="search-trigger" aria-label="Open search">
           Search <span class="search-kbd">⌘K</span>
         </button>
@@ -112,26 +113,21 @@ const ogImageUrl = new URL("/og-image.png", Astro.site ?? "https://www.omarolmos
           target="_blank"
           rel="noreferrer"
         >
-          Let's connect <span aria-hidden="true">↗</span>
+          LinkedIn <span aria-hidden="true">↗</span>
         </a>
       </nav>
     </header>
     <main id="main-content" class="wiki-shell">
       <div class="wiki-navigation">
-        <a class="wiki-back" href="/wiki/">
-          ← Back to wiki
-        </a>
+        {!isIndex && (
+          <a class="wiki-back" href="/wiki/">
+            ← Wiki index
+          </a>
+        )}
         <a class="wiki-back" href="/">
-          Portfolio ↗
+          ← Home
         </a>
       </div>
-      {!isIndex && (
-        <div class="wiki-meta">
-          <span>Engineering Note</span>
-          <span>·</span>
-          <span class="read-time">~2 min read</span>
-        </div>
-      )}
       {!isIndex && <TableOfContents headings={headings} />}
       <article class="wiki-content">
         <slot />
@@ -141,7 +137,7 @@ const ogImageUrl = new URL("/og-image.png", Astro.site ?? "https://www.omarolmos
         <nav class="wiki-pager" aria-label="Article navigation">
           {prevArticle ? (
             <a class="pager-card prev" href={prevArticle.href}>
-              <span class="pager-direction">← Previous article</span>
+              <span class="pager-direction">← Previous</span>
               <span class="pager-title">{prevArticle.title}</span>
             </a>
           ) : (
@@ -149,7 +145,7 @@ const ogImageUrl = new URL("/og-image.png", Astro.site ?? "https://www.omarolmos
           )}
           {nextArticle && (
             <a class="pager-card next" href={nextArticle.href}>
-              <span class="pager-direction">Next article →</span>
+              <span class="pager-direction">Next →</span>
               <span class="pager-title">{nextArticle.title}</span>
             </a>
           )}
@@ -157,12 +153,18 @@ const ogImageUrl = new URL("/og-image.png", Astro.site ?? "https://www.omarolmos
       )}
 
       <footer class="wiki-footer">
-        <span>Omar Olmos / 2026</span>
-        <a href="#top">Back to top ↑</a>
+        <span>Omar Olmos · 2026</span>
+        <div style="display: flex; gap: 20px; align-items: center;">
+          <button type="button" class="flappy-trigger" data-open-flappy>
+            [Flappy Pod]
+          </button>
+          <a href="#top">Top ↑</a>
+        </div>
       </footer>
     </main>
 
     <SearchModal />
+    <FlappyPodModal />
     <BackToTop />
 
     <script>

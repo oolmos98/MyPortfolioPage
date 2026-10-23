@@ -1,0 +1,505 @@
+---
+---
+
+<dialog id="flappy-dialog" class="flappy-dialog" aria-label="Flappy Pod Mini-Game">
+  <div class="flappy-panel">
+    <div class="flappy-header">
+      <div class="flappy-title-group">
+        <span class="flappy-status-dot" aria-hidden="true"></span>
+        <span class="flappy-title">flappy-pod // prod-us-east-1</span>
+      </div>
+      <div class="flappy-hud">
+        <span>
+          SCORE: <strong id="flappy-score">0</strong>
+        </span>
+        <span>
+          BEST: <strong id="flappy-best">0</strong>
+        </span>
+        <button
+          type="button"
+          id="flappy-close-btn"
+          class="flappy-close-btn"
+          aria-label="Close game"
+        >
+          ✕ ESC
+        </button>
+      </div>
+    </div>
+
+    <div class="flappy-canvas-wrap">
+      <canvas id="flappy-canvas"></canvas>
+    </div>
+
+    <div class="flappy-footer">
+      <span>[SPACE / CLICK / TAP] Scale thruster</span>
+      <span>Avoid OOMKills, 504s &amp; pool exhaustion</span>
+    </div>
+  </div>
+</dialog>
+
+<script>
+  const initFlappyPod = () => {
+    const dialog = document.getElementById("flappy-dialog") as HTMLDialogElement | null;
+    const canvas = document.getElementById("flappy-canvas") as HTMLCanvasElement | null;
+    const closeBtn = document.getElementById("flappy-close-btn");
+    const scoreEl = document.getElementById("flappy-score");
+    const bestEl = document.getElementById("flappy-best");
+
+    if (!dialog || !canvas || dialog.dataset.initialized === "true") return;
+    dialog.dataset.initialized = "true";
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let viewW = 860;
+    let viewH = 540;
+    const GROUND_H = 36;
+    const getPlayH = () => Math.max(240, viewH - GROUND_H);
+
+    const HAZARDS = [
+      "OOMKilled:137",
+      "HTTP 504",
+      "CrashLoop",
+      "HikariTimeout",
+      "CertExpired",
+      "CPUThrottled",
+      "ConnRefused",
+      "Deadlock:40P01",
+    ];
+
+    let animId = 0;
+    let lastTime = 0;
+    let state: "IDLE" | "PLAYING" | "GAMEOVER" = "IDLE";
+    let score = 0;
+    let bestScore = 0;
+    let lastCrashReason = "OOMKilled:137";
+
+    try {
+      bestScore = parseInt(localStorage.getItem("flappy_pod_best") || "0", 10) || 0;
+    } catch {
+      bestScore = 0;
+    }
+    if (bestEl) bestEl.textContent = String(bestScore);
+
+    const pod = {
+      x: 120,
+      y: 220,
+      w: 32,
+      h: 24,
+      vy: 0,
+      flapTimer: 0,
+    };
+
+    interface Pipe {
+      x: number;
+      w: number;
+      gapY: number;
+      gapH: number;
+      passed: boolean;
+      topLabel: string;
+      botLabel: string;
+    }
+
+    let pipes: Pipe[] = [];
+    let spawnTimer = 0;
+    let groundOffset = 0;
+
+    const syncCanvasSize = () => {
+      const rect = canvas.getBoundingClientRect();
+      const w = Math.max(300, Math.floor(rect.width || 860));
+      const h = Math.max(280, Math.floor(rect.height || 540));
+      viewW = w;
+      viewH = h;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      pod.x = Math.min(140, Math.max(68, Math.floor(viewW * 0.2)));
+    };
+
+    const pickHazard = () => HAZARDS[Math.floor(Math.random() * HAZARDS.length)];
+
+    const resetGame = () => {
+      const playH = getPlayH();
+      pod.y = playH / 2 - pod.h / 2;
+      pod.vy = 0;
+      pod.flapTimer = 0;
+      pipes = [];
+      spawnTimer = 0.75;
+      score = 0;
+      if (scoreEl) scoreEl.textContent = "0";
+    };
+
+    const flap = () => {
+      const jumpVel = -310;
+      if (state === "IDLE") {
+        resetGame();
+        state = "PLAYING";
+        pod.vy = jumpVel;
+        pod.flapTimer = 0.15;
+      } else if (state === "PLAYING") {
+        pod.vy = jumpVel;
+        pod.flapTimer = 0.15;
+      } else if (state === "GAMEOVER") {
+        resetGame();
+        state = "PLAYING";
+        pod.vy = jumpVel;
+        pod.flapTimer = 0.15;
+      }
+    };
+
+    const triggerGameOver = (reason: string) => {
+      state = "GAMEOVER";
+      lastCrashReason = reason;
+      if (score > bestScore) {
+        bestScore = score;
+        if (bestEl) bestEl.textContent = String(bestScore);
+        try {
+          localStorage.setItem("flappy_pod_best", String(bestScore));
+        } catch {
+          // ignore storage errors
+        }
+      }
+    };
+
+    const update = (dt: number) => {
+      const playH = getPlayH();
+
+      if (state === "IDLE") {
+        groundOffset = (groundOffset + 100 * dt) % 24;
+        pod.y = playH / 2 - pod.h / 2 + Math.sin(performance.now() / 240) * 7;
+        return;
+      }
+
+      if (state !== "PLAYING") return;
+
+      groundOffset = (groundOffset + 175 * dt) % 24;
+
+      if (pod.flapTimer > 0) {
+        pod.flapTimer = Math.max(0, pod.flapTimer - dt);
+      }
+
+      const gravity = 880;
+      pod.vy += gravity * dt;
+      pod.y += pod.vy * dt;
+
+      if (pod.y <= 0) {
+        pod.y = 0;
+        pod.vy = 0;
+      }
+
+      if (pod.y + pod.h >= playH) {
+        pod.y = playH - pod.h;
+        triggerGameOver("NodeNotReady");
+        return;
+      }
+
+      spawnTimer -= dt;
+      if (spawnTimer <= 0) {
+        const baseGap = Math.min(156, Math.max(118, Math.floor(playH * 0.28)));
+        const gapH = Math.max(102, baseGap - Math.min(score * 1.4, 28));
+        const minGapY = 48;
+        const maxGapY = Math.max(minGapY + 20, playH - gapH - 48);
+        const gapY = Math.floor(minGapY + Math.random() * (maxGapY - minGapY));
+
+        pipes.push({
+          x: viewW + 12,
+          w: 64,
+          gapY,
+          gapH,
+          passed: false,
+          topLabel: pickHazard(),
+          botLabel: pickHazard(),
+        });
+        spawnTimer = 1.45;
+      }
+
+      const speed = 185 + Math.min(score * 3, 60);
+
+      for (let i = pipes.length - 1; i >= 0; i--) {
+        const p = pipes[i];
+        p.x -= speed * dt;
+
+        if (!p.passed && p.x + p.w < pod.x) {
+          p.passed = true;
+          score += 1;
+          if (scoreEl) scoreEl.textContent = String(score);
+        }
+
+        // Collision check (with 3px forgiveness margin)
+        const hitX = pod.x + pod.w - 3 > p.x && pod.x + 3 < p.x + p.w;
+        if (hitX) {
+          const hitTop = pod.y + 3 < p.gapY;
+          const hitBot = pod.y + pod.h - 3 > p.gapY + p.gapH;
+          if (hitTop) {
+            triggerGameOver(p.topLabel);
+            return;
+          }
+          if (hitBot) {
+            triggerGameOver(p.botLabel);
+            return;
+          }
+        }
+
+        if (p.x + p.w < -30) {
+          pipes.splice(i, 1);
+        }
+      }
+    };
+
+    const drawGrid = () => {
+      const playH = getPlayH();
+      ctx.fillStyle = "#f2f0e9";
+      ctx.fillRect(0, 0, viewW, viewH);
+
+      ctx.strokeStyle = "rgba(24, 35, 31, 0.065)";
+      ctx.lineWidth = 1;
+
+      for (let x = 0; x < viewW; x += 28) {
+        ctx.beginPath();
+        ctx.moveTo(x + 0.5, 0);
+        ctx.lineTo(x + 0.5, playH);
+        ctx.stroke();
+      }
+      for (let y = 0; y < playH; y += 28) {
+        ctx.beginPath();
+        ctx.moveTo(0, y + 0.5);
+        ctx.lineTo(viewW, y + 0.5);
+        ctx.stroke();
+      }
+    };
+
+    const drawPipes = () => {
+      const playH = getPlayH();
+      for (const p of pipes) {
+        const botY = p.gapY + p.gapH;
+        const botH = playH - botY;
+
+        // Top obstacle
+        ctx.fillStyle = "#18231f";
+        ctx.fillRect(p.x, 0, p.w, p.gapY);
+        // Lip
+        ctx.fillStyle = "#435c00";
+        ctx.fillRect(p.x - 3, Math.max(0, p.gapY - 12), p.w + 6, 12);
+
+        // Bottom obstacle
+        ctx.fillStyle = "#18231f";
+        ctx.fillRect(p.x, botY, p.w, botH);
+        // Lip
+        ctx.fillStyle = "#435c00";
+        ctx.fillRect(p.x - 3, botY, p.w + 6, Math.min(12, botH));
+
+        // Vertical hazard label on obstacles if tall enough
+        ctx.save();
+        ctx.fillStyle = "rgba(242, 240, 233, 0.75)";
+        ctx.font = '500 10.5px "DM Mono", monospace';
+        if (p.gapY > 64) {
+          ctx.translate(p.x + p.w / 2 + 4, p.gapY - 20);
+          ctx.rotate(-Math.PI / 2);
+          ctx.fillText(p.topLabel, 0, 0);
+        }
+        ctx.restore();
+
+        ctx.save();
+        ctx.fillStyle = "rgba(242, 240, 233, 0.75)";
+        ctx.font = '500 10.5px "DM Mono", monospace';
+        if (botH > 64) {
+          ctx.translate(p.x + p.w / 2 + 4, botY + botH - 12);
+          ctx.rotate(-Math.PI / 2);
+          ctx.fillText(p.botLabel, 0, 0);
+        }
+        ctx.restore();
+      }
+    };
+
+    const drawPod = () => {
+      ctx.save();
+      const cx = pod.x + pod.w / 2;
+      const cy = pod.y + pod.h / 2;
+      ctx.translate(cx, cy);
+
+      const angle = state === "IDLE" ? 0 : Math.max(-0.38, Math.min(0.55, pod.vy / 580));
+      ctx.rotate(angle);
+
+      // Thruster pulse when flapping
+      if (pod.flapTimer > 0) {
+        ctx.fillStyle = "#d8f45f";
+        ctx.fillRect(-pod.w / 2 - 9, -5, 8, 10);
+        ctx.strokeStyle = "#18231f";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(-pod.w / 2 - 9, -5, 8, 10);
+      }
+
+      // Main pod chassis
+      ctx.fillStyle = "#18231f";
+      ctx.fillRect(-pod.w / 2, -pod.h / 2, pod.w, pod.h);
+
+      // Inner terminal window / container badge
+      ctx.fillStyle = "#f2f0e9";
+      ctx.fillRect(-pod.w / 2 + 5, -pod.h / 2 + 5, 14, 8);
+
+      // Status LED (acid green when alive, red when crashed)
+      ctx.fillStyle = state === "GAMEOVER" ? "#d9534f" : "#d8f45f";
+      ctx.fillRect(pod.w / 2 - 9, -pod.h / 2 + 5, 5, 5);
+
+      // Bottom rack stripe
+      ctx.fillStyle = "#435c00";
+      ctx.fillRect(-pod.w / 2 + 5, pod.h / 2 - 6, pod.w - 10, 2);
+
+      ctx.restore();
+    };
+
+    const drawGround = () => {
+      const playH = getPlayH();
+      ctx.fillStyle = "#18231f";
+      ctx.fillRect(0, playH, viewW, GROUND_H);
+
+      // Scrolling diagonal tick marks along the top of the ground bar
+      ctx.strokeStyle = "rgba(216, 244, 95, 0.45)";
+      ctx.lineWidth = 1.5;
+      for (let x = -groundOffset; x < viewW + 24; x += 16) {
+        ctx.beginPath();
+        ctx.moveTo(x, playH + 1);
+        ctx.lineTo(x - 6, playH + 9);
+        ctx.stroke();
+      }
+
+      ctx.fillStyle = "rgba(242, 240, 233, 0.82)";
+      ctx.font = '400 11px "DM Mono", monospace';
+      const statusText =
+        state === "GAMEOVER"
+          ? `STATUS: CRASHLOOP (${lastCrashReason})`
+          : state === "PLAYING"
+            ? "STATUS: HEALTHY · LIVENESS: 200 OK"
+            : "STATUS: STANDBY · READY TO SCHEDULE";
+      ctx.fillText(statusText, 14, playH + 24);
+    };
+
+    const drawOverlay = () => {
+      const playH = getPlayH();
+      const boxW = Math.min(340, viewW - 32);
+
+      if (state === "IDLE") {
+        const boxH = 118;
+        const bx = (viewW - boxW) / 2;
+        const by = (playH - boxH) / 2;
+
+        ctx.fillStyle = "rgba(24, 35, 31, 0.9)";
+        ctx.fillRect(bx, by, boxW, boxH);
+        ctx.strokeStyle = "#d8f45f";
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(bx, by, boxW, boxH);
+
+        ctx.fillStyle = "#d8f45f";
+        ctx.font = '500 11px "DM Mono", monospace';
+        ctx.textAlign = "center";
+        ctx.fillText("OPENSHIFT POD SCHEDULER", viewW / 2, by + 30);
+
+        ctx.fillStyle = "#f2f0e9";
+        ctx.font = '700 19px "DM Sans", sans-serif';
+        ctx.fillText("Keep the pod in production", viewW / 2, by + 62);
+
+        ctx.fillStyle = "rgba(242, 240, 233, 0.78)";
+        ctx.font = '400 11.5px "DM Mono", monospace';
+        ctx.fillText("Press SPACE, Click, or Tap to launch", viewW / 2, by + 94);
+        ctx.textAlign = "left";
+      } else if (state === "GAMEOVER") {
+        const boxH = 152;
+        const bx = (viewW - boxW) / 2;
+        const by = (playH - boxH) / 2;
+
+        ctx.fillStyle = "rgba(24, 35, 31, 0.92)";
+        ctx.fillRect(bx, by, boxW, boxH);
+        ctx.strokeStyle = "#d8f45f";
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(bx, by, boxW, boxH);
+
+        ctx.fillStyle = "#d8f45f";
+        ctx.font = '500 11px "DM Mono", monospace';
+        ctx.textAlign = "center";
+        ctx.fillText(`POD TERMINATED // ${lastCrashReason}`, viewW / 2, by + 30);
+
+        ctx.fillStyle = "#f2f0e9";
+        ctx.font = '700 21px "DM Sans", sans-serif';
+        ctx.fillText(`Requests Routed: ${score}`, viewW / 2, by + 64);
+
+        ctx.fillStyle = "rgba(242, 240, 233, 0.78)";
+        ctx.font = '400 12px "DM Mono", monospace';
+        ctx.fillText(`Best Uptime: ${bestScore}`, viewW / 2, by + 92);
+
+        ctx.fillStyle = "#d8f45f";
+        ctx.fillText("[SPACE / TAP] git revert & redeploy", viewW / 2, by + 126);
+        ctx.textAlign = "left";
+      }
+    };
+
+    const render = () => {
+      drawGrid();
+      drawPipes();
+      drawPod();
+      drawGround();
+      drawOverlay();
+    };
+
+    const loop = (now: number) => {
+      if (!dialog.open) return;
+      const dt = Math.min((now - lastTime) / 1000, 0.05);
+      lastTime = now;
+      update(dt);
+      render();
+      animId = requestAnimationFrame(loop);
+    };
+
+    const openGame = () => {
+      dialog.showModal();
+      syncCanvasSize();
+      state = "IDLE";
+      resetGame();
+      lastTime = performance.now();
+      cancelAnimationFrame(animId);
+      animId = requestAnimationFrame(loop);
+    };
+
+    const closeGame = () => {
+      cancelAnimationFrame(animId);
+      dialog.close();
+    };
+
+    window.addEventListener("resize", () => {
+      if (dialog.open) {
+        syncCanvasSize();
+        render();
+      }
+    });
+
+    document.querySelectorAll("[data-open-flappy]").forEach((btn) => {
+      btn.addEventListener("click", openGame);
+    });
+
+    closeBtn?.addEventListener("click", closeGame);
+
+    dialog.addEventListener("click", (e) => {
+      if (e.target === dialog) closeGame();
+    });
+
+    dialog.addEventListener("close", () => {
+      cancelAnimationFrame(animId);
+    });
+
+    canvas.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      flap();
+    });
+
+    window.addEventListener("keydown", (e) => {
+      if (!dialog.open) return;
+      if (e.code === "Space" || e.code === "ArrowUp" || e.code === "KeyW") {
+        e.preventDefault();
+        flap();
+      }
+    });
+  };
+
+  document.addEventListener("astro:page-load", initFlappyPod);
+  initFlappyPod();
+</script>

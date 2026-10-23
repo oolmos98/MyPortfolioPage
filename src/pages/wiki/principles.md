@@ -1,61 +1,46 @@
 ---
 layout: ../../layouts/WikiLayout.astro
 title: Working principles
-description: Engineering principles for technical decisions, operations, and leadership.
+description: Practical habits for technical decisions, production operations, and working with teams.
 ---
 
 # Working principles
 
-These standards guide how I make technical decisions, review architectural proposals, mentor engineers, and operate distributed systems in production. Reliable engineering is built on discipline, clarity, and empathy for both users and teammates.
+These are five habits I try to stick to when designing services, reviewing pull requests, debugging production issues, and working with other engineers.
 
-## 1. Find the decision point
+## 1. Fix the problem at the decision point
 
-Before modifying wiring, wrapping abstractions, or adding retry logic around an issue, locate the exact point where the system decides its behavior.
+When a bug shows up in production, the tempting fix is to add a retry loop, a null check, or a wrapper layer at the end of the call chain. Most of the time, that just hides the real problem and makes the system harder to reason about six months later.
 
-- **Trace to the root**: When diagnosing unexpected behavior, trace down to the responsible line of code, database query, or network routing rule before applying workarounds.
-- **Keep changes minimal**: Intervening at the actual decision point keeps diffs small, limits blast radius, and simplifies peer review.
-- **Avoid compensatory layers**: Adding retries around an unindexed query or creating wrappers around leaky abstractions hides systemic flaws and invites catastrophic cascading outages.
+Before writing a patch, trace the behavior back to the exact line of code, SQL query, or routing rule where the system took the wrong turn. Fixing it at the source keeps the diff small and prevents cascading workarounds.
 
-## 2. Make operations part of design
+## 2. Treat operations as part of the design
 
-An API, microservice, or infrastructure component is incomplete if it cannot be monitored, debugged, and safely recovered in production.
+A service isn't ready for production just because the happy-path unit tests pass. While designing an API or background worker, we should already know:
 
-- **Observability is not an afterthought**: Design every service with explicit health probes, structured logging, distributed tracing headers, and service-level indicators (SLIs) from day one. See [Observability and collaboration](/wiki/observability-collaboration/).
-- **Plan for failure**: Document expected failure modes, circuit breaker behaviors, and degraded fallback states during the initial design phase.
-- **Deterministic rollbacks**: Every deployment plan must include a verified rollback procedure. If a database migration cannot be reversed without downtime, the rollout plan is incomplete. See [Secure delivery](/wiki/secure-delivery/).
+- Which health probe tells Kubernetes the pod is ready for traffic vs. deadlocked?
+- What happens when the downstream database or third-party API slows down by 10x?
+- Which Dynatrace metric or trace will tell the on-call engineer what broke at 3 a.m.?
+- How do we roll this release back if the migration goes sideways?
 
-## 3. Prefer boring interfaces
+If we can't answer those four questions during design review, the feature isn't ready to ship. (See [Spring Boot on ROSA](/wiki/spring-boot-rosa/) and [Observability and collaboration](/wiki/observability-collaboration/).)
 
-Battle-tested protocols, simple data formats, and explicit contracts consistently outperform clever, proprietary abstractions over the lifespan of enterprise software.
+## 3. Prefer boring, explicit interfaces
 
-- **Standardization over novelty**: Favor standard REST/JSON, well-indexed SQL, and standard Kubernetes primitives over bespoke frameworks or undocumented custom abstractions.
-- **Explicit over implicit**: Avoid magical framework reflection and hidden dynamic behaviors. Configuration, dependency injection, and timeouts should be readable and obvious to any engineer inspecting the codebase.
-- **Simplicity is a reliability feature**: Complex systems fail in complex ways. Reducing the number of moving parts is the most effective way to eliminate failure domains.
+Clever reflection tricks, custom framework wrappers, and undocumented conventions feel productive for the person who wrote them and painful for everyone who maintains them later.
 
-## 4. Optimize for the next engineer
+Standard REST or GraphQL contracts, straightforward SQL, explicit timeouts, and declarative GitOps manifests age much better than bespoke abstractions. Fewer moving parts mean fewer weird failure modes under load.
 
-Code is written once but read, debugged, and maintained hundreds of times. High-caliber technical work deliberately leaves behind clarity rather than mystery.
+## 4. Leave context for the next engineer
 
-- **Document the _why_, not just the _what_**: Code and configuration describe what the system does. Comments, pull request descriptions, and Architecture Decision Records (ADRs) must explain the context, constraints, and alternatives considered.
-- **Predictable project structures**: Follow established ecosystem conventions (such as standard Maven/Gradle project layouts or GitOps folder hierarchies) so new team members can navigate codebases intuitively.
-- **Executable tests as specifications**: High-quality unit and integration tests serve as living documentation of system requirements and edge cases. See [AI-assisted engineering](/wiki/ai-assisted-engineering/) for disciplined testing practices.
+Code gets written once and read hundreds of times—often by a teammate debugging an incident under time pressure.
 
-## 5. Make tradeoffs visible
+- **Explain _why_, not just _what_**: The code shows what is happening. Comments, commit messages, and short Architecture Decision Records (ADRs) should explain the constraint or trade-off that forced that choice.
+- **Stick to standard project layouts**: Whether it's a Spring Boot repo or a Kustomize GitOps tree, predictable folder structures mean new engineers don't need a tour guide to find where timeouts are configured.
+- **Write tests that document behavior**: Clear integration tests are the most reliable documentation a repo has because they break if they go out of date.
 
-Every technical decision involves compromise. Strong engineering leadership documents what was sacrificed, why the tradeoff was accepted, and what conditions would justify changing the decision in the future.
+## 5. Name the trade-offs out loud
 
-- **Acknowledge accepted risks**: Whether accepting eventual consistency, deferring cross-region replication, or choosing a simpler storage engine, explicitly record the decision in an ADR.
-- **Identify review triggers**: Define quantitative thresholds that trigger architectural re-evaluations (e.g., "Revisit single-node Aurora writer if transaction volume exceeds 5,000 writes/second").
-- **Foster constructive debate**: Ground technical disagreements in verifiable data, latency metrics, and organizational costs rather than personal preference.
+Every architecture choice trades one problem for another—simpler deployment now vs. harder multi-region scaling later, strict consistency vs. lower latency, building in-house vs. adopting a managed tool.
 
-## Principles in practice
-
-| Principle                      | When Applied to Architecture                                   | When Applied to Incidents                                               | When Applied to Team Culture                                               |
-| :----------------------------- | :------------------------------------------------------------- | :---------------------------------------------------------------------- | :------------------------------------------------------------------------- |
-| **Find the decision point**    | Eliminate unnecessary proxy layers and leaky abstractions.     | Diagnose root cause via distributed tracing before restarting services. | Address underlying team misalignments rather than symptoms.                |
-| **Operations as design**       | Size connection pools and configure graceful shutdown hooks.   | Maintain structured communication and assign clear incident roles.      | Celebrate preventative platform investments equally with feature releases. |
-| **Boring interfaces**          | Choose stable protocols and declarative GitOps configurations. | Rely on standard runbooks and proven rollback mechanisms.               | Encourage standard conventions that reduce onboarding cognitive load.      |
-| **Optimize for next engineer** | Write modular code with explicit types and descriptive names.  | Publish blameless post-mortems with actionable platform tickets.        | Mentor junior engineers by explaining architectural rationale.             |
-| **Make tradeoffs visible**     | Author clear Architecture Decision Records (ADRs).             | Communicate transparent customer impact during outages.                 | Encourage honest feedback regarding technical debt.                        |
-
-To see how these principles translate directly into cloud architecture, explore [Platform engineering](/wiki/platform-engineering/) and [Spring Boot on ROSA](/wiki/spring-boot-rosa/).
+When making a technical call, I like to write down what we are optimizing for, what risk we are accepting, and what threshold would make us revisit the decision later (for example: _"A single Aurora writer with read replicas handles our current load; revisit sharding or caching if sustained writes pass 3,000/sec"_). Naming trade-offs openly keeps architecture discussions grounded in numbers instead of opinions.
